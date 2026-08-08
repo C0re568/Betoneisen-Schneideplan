@@ -1,0 +1,804 @@
+<title>Schneideplan Betoneisen</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#f4f5f7; --panel:#ffffff; --ink:#15181d; --muted:#5c6674;
+    --line:#d9dee5; --line-soft:#eceff3;
+    --accent:#1f6feb; --accent-soft:#e7f0ff;
+    --warn:#b45309; --warn-soft:#fff4e3;
+    --bad:#c02626; --bad-soft:#fdeaea;
+    --ok:#166534; --ok-soft:#e8f6ec;
+    --waste:#c9ced6;
+    --radius:10px;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  :root:not([data-theme="light"]){}
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12151a; --panel:#1a1e25; --ink:#e8ecf2; --muted:#9aa5b4;
+      --line:#2c333d; --line-soft:#232931;
+      --accent:#6aa4ff; --accent-soft:#1d2a3f;
+      --warn:#f0b357; --warn-soft:#3a2e18;
+      --bad:#ff8080; --bad-soft:#3a2020;
+      --ok:#7ddc9b; --ok-soft:#17301f;
+      --waste:#3a424d;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12151a; --panel:#1a1e25; --ink:#e8ecf2; --muted:#9aa5b4;
+    --line:#2c333d; --line-soft:#232931;
+    --accent:#6aa4ff; --accent-soft:#1d2a3f;
+    --warn:#f0b357; --warn-soft:#3a2e18;
+    --bad:#ff8080; --bad-soft:#3a2020;
+    --ok:#7ddc9b; --ok-soft:#17301f;
+    --waste:#3a424d;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:24px 18px 80px}
+  h1{font-size:24px; margin:0 0 4px; letter-spacing:-.01em}
+  h2{font-size:17px; margin:0 0 12px; letter-spacing:-.01em}
+  h3{font-size:14px; margin:0 0 8px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
+  p.sub{margin:0 0 22px; color:var(--muted); font-size:14px}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:16px}
+  .row{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end}
+  label.f{display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted)}
+  input,select{
+    font:inherit; color:var(--ink); background:var(--panel);
+    border:1px solid var(--line); border-radius:6px; padding:6px 8px; min-width:0;
+  }
+  input:focus,select:focus{outline:2px solid var(--accent); outline-offset:-1px}
+  input[type=number]{font-variant-numeric:tabular-nums}
+  button{
+    font:inherit; font-weight:500; cursor:pointer; color:var(--ink);
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:7px 12px;
+  }
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+  button.primary:hover{filter:brightness(1.08)}
+  button.mini{padding:2px 7px; font-size:12px; line-height:1.4}
+  .btnbar{display:flex; flex-wrap:wrap; gap:8px}
+
+  table{border-collapse:collapse; width:100%; font-size:14px}
+  th,td{text-align:left; padding:5px 8px; border-bottom:1px solid var(--line-soft); vertical-align:middle}
+  th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; white-space:nowrap}
+  td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
+  .tbl-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
+
+  .list-card{border:1px solid var(--line); border-radius:var(--radius); padding:12px; margin-bottom:12px; background:var(--panel)}
+  .list-head{display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap}
+  .list-head input{font-weight:600; flex:1 1 220px}
+  .rowtable input[type=text]{width:100%; min-width:64px}
+  .rowtable input[type=number]{width:100%; min-width:56px}
+
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px}
+  .kpi{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--panel)}
+  .kpi .k{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
+  .kpi .v{font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
+  .kpi .n{font-size:12px; color:var(--muted)}
+
+  .bar{margin:0 0 10px; break-inside:avoid; page-break-inside:avoid}
+  .bar-head{display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); margin-bottom:3px; flex-wrap:wrap}
+  .bar-head b{color:var(--ink); font-size:13px; font-family:var(--mono)}
+  .bar-vis{display:flex; height:30px; border:1px solid var(--line); border-radius:5px; overflow:hidden; background:var(--waste)}
+  .seg{display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600;
+       color:#10131a; overflow:hidden; white-space:nowrap; border-right:1px solid rgba(0,0,0,.28)}
+  .seg.rest{background:repeating-linear-gradient(45deg,transparent,transparent 5px,rgba(128,128,128,.35) 5px,rgba(128,128,128,.35) 10px);
+            color:var(--muted); font-weight:500; border-right:none}
+  .chips{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px}
+  .chip{font-size:11px; padding:1px 6px; border-radius:20px; border:1px solid var(--line); background:var(--panel); font-family:var(--mono)}
+
+  .tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:20px; font-weight:600}
+  .tag.bad{background:var(--bad-soft); color:var(--bad)}
+  .tag.warn{background:var(--warn-soft); color:var(--warn)}
+  .tag.ok{background:var(--ok-soft); color:var(--ok)}
+  .tag.info{background:var(--accent-soft); color:var(--accent)}
+
+  .note{border-left:3px solid var(--accent); background:var(--accent-soft); padding:10px 12px; border-radius:0 6px 6px 0; font-size:14px; margin:0 0 12px}
+  .note.warn{border-color:var(--warn); background:var(--warn-soft)}
+  .note.bad{border-color:var(--bad); background:var(--bad-soft)}
+  .muted{color:var(--muted)}
+  .small{font-size:12px}
+  details{margin-top:8px}
+  summary{cursor:pointer; font-size:13px; color:var(--muted)}
+  .hidden{display:none !important}
+  .grp-title{display:flex; align-items:baseline; gap:10px; margin:18px 0 10px; flex-wrap:wrap}
+  .grp-title .d{font-size:19px; font-weight:600}
+  hr{border:none; border-top:1px solid var(--line); margin:18px 0}
+
+  @media print{
+    body{background:#fff}
+    .no-print{display:none !important}
+    .panel,.list-card{border-color:#bbb; box-shadow:none}
+    .wrap{max-width:none; padding:0}
+    .seg{color:#000}
+    a{text-decoration:none; color:inherit}
+  }
+</style>
+
+<div class="wrap">
+  <h1>Schneideplan Betoneisen</h1>
+  <p class="sub">
+    Verschnittoptimierte Aufteilung von Stabpositionen auf Lagerstangen (1D-Zuschnittproblem).
+    Schnittbreite wird ignoriert. Jedes geschnittene Stück bleibt seiner Position zugeordnet.
+  </p>
+
+  <div class="panel no-print">
+    <h2>1 · Einstellungen</h2>
+    <div class="row">
+      <label class="f">Lagerlänge Standard [m]
+        <input type="number" id="stockDefault" value="12" step="0.01" min="0.5" style="width:110px">
+      </label>
+      <label class="f">Mind. verwertbares Reststück [m]
+        <input type="number" id="minRest" value="1.00" step="0.05" min="0" style="width:130px">
+      </label>
+      <label class="f" style="justify-content:flex-end">&nbsp;
+        <span class="small" style="display:flex; gap:6px; align-items:center; padding-bottom:7px; color:var(--ink)">
+          <input type="checkbox" id="groupSame" checked> identische Stangen zusammenfassen
+        </span>
+      </label>
+      <label class="f">Rechenaufwand
+        <select id="effort">
+          <option value="1">schnell</option>
+          <option value="2" selected>normal</option>
+          <option value="3">gründlich</option>
+        </select>
+      </label>
+      <button class="primary" id="btnCalc">Schneideplan berechnen</button>
+      <button id="btnPrint">Drucken / PDF</button>
+    </div>
+    <div id="diaSettings" style="margin-top:12px"></div>
+  </div>
+
+  <div class="panel no-print">
+    <h2>2 · Stücklisten</h2>
+    <div id="lists"></div>
+    <div class="btnbar" style="margin-top:10px">
+      <button id="btnAddList">+ Stückliste</button>
+      <button id="btnDemo">Beispieldaten laden</button>
+      <button id="btnClear">Alles leeren</button>
+      <button id="btnExport">Export JSON</button>
+      <button id="btnImport">Import JSON</button>
+      <input type="file" id="fileImport" accept=".json,application/json" class="hidden">
+    </div>
+    <p class="small muted" style="margin:10px 0 0">
+      Spalte <b>fix</b> = Position wird in Fixlänge ab Werk bestellt und nicht selbst geschnitten
+      (fällt aus dem Schneideplan heraus, Verschnitt = 0).
+      Spalte <b>Ring</b> in den Durchmesser-Einstellungen = Material kommt vom Ring (gerichteter Betonstahl),
+      dann entsteht beim Ablängen ebenfalls kein Verschnitt.
+    </p>
+  </div>
+
+  <div id="out"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- Hilfsfunktionen ---------- */
+const NF = (n, d = 2) => (isFinite(n) ? n : 0).toLocaleString("de-AT", { minimumFractionDigits: d, maximumFractionDigits: d });
+const NF0 = n => Math.round(n).toLocaleString("de-AT");
+const kgPerM = d => 0.006165 * d * d;           // Betonstahl: 7850 kg/m³
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const mm = m => Math.round(m * 1000);
+const m = x => x / 1000;
+
+/* ---------- Zustand ---------- */
+const DEMO = {
+  stockDefault: 12, minRest: 1.0,
+  dia: {},
+  lists: [
+    {
+      name: "Stoßüberdeckung / Zulageeisen auf Platten",
+      rows: [
+        { pos: "1", qty: 9, dia: 8, len: 4.80, fix: false },
+        { pos: "2", qty: 4, dia: 12, len: 4.80, fix: false },
+        { pos: "3", qty: 39, dia: 8, len: 3.50, fix: false },
+        { pos: "4", qty: 92, dia: 8, len: 5.00, fix: false },
+        { pos: "5", qty: 4, dia: 8, len: 4.00, fix: false },
+        { pos: "6", qty: 24, dia: 8, len: 3.00, fix: false },
+        { pos: "7", qty: 24, dia: 8, len: 4.25, fix: false },
+        { pos: "8", qty: 3, dia: 12, len: 3.00, fix: false },
+        { pos: "9", qty: 10, dia: 12, len: 2.00, fix: false },
+        { pos: "10", qty: 4, dia: 12, len: 3.50, fix: false }
+      ]
+    },
+    {
+      name: "Obere Bewehrung",
+      rows: [
+        { pos: "11", qty: 53, dia: 12, len: 2.50, fix: false },
+        { pos: "12", qty: 58, dia: 8, len: 2.50, fix: false },
+        { pos: "13", qty: 37, dia: 12, len: 1.40, fix: false },
+        { pos: "14", qty: 10, dia: 12, len: 3.00, fix: false },
+        { pos: "15", qty: 6, dia: 10, len: 3.00, fix: false },
+        { pos: "16", qty: 3, dia: 12, len: 4.50, fix: false },
+        { pos: "17", qty: 6, dia: 12, len: 3.50, fix: false },
+        { pos: "18", qty: 28, dia: 12, len: 2.00, fix: false }
+      ]
+    },
+    {
+      name: "Unterzüge",
+      rows: [
+        { pos: "UZ1", qty: 5, dia: 12, len: 3.65, fix: false },
+        { pos: "UZ2", qty: 4, dia: 12, len: 2.45, fix: false },
+        { pos: "UZ3", qty: 4, dia: 12, len: 2.15, fix: false },
+        { pos: "UZ4", qty: 4, dia: 12, len: 2.45, fix: false },
+        { pos: "UZ5", qty: 4, dia: 12, len: 2.45, fix: false },
+        { pos: "UZ6", qty: 2, dia: 12, len: 2.62, fix: false },
+        { pos: "UZ6", qty: 2, dia: 12, len: 2.50, fix: false }
+      ]
+    }
+  ]
+};
+
+let state = JSON.parse(JSON.stringify(DEMO));
+const $ = id => document.getElementById(id);
+
+/* ---------- Rendering Eingabe ---------- */
+function listShort(i) { return String.fromCharCode(65 + i); }
+
+function renderLists() {
+  const host = $("lists");
+  host.innerHTML = state.lists.map((L, li) => `
+    <div class="list-card" data-li="${li}">
+      <div class="list-head">
+        <span class="tag info">${listShort(li)}</span>
+        <input type="text" value="${esc(L.name)}" data-act="name" placeholder="Bezeichnung der Stückliste">
+        <button class="mini" data-act="addrow">+ Zeile</button>
+        <button class="mini" data-act="dellist">Liste löschen</button>
+      </div>
+      <div class="tbl-scroll">
+      <table class="rowtable">
+        <thead><tr>
+          <th style="width:20%">Pos.</th><th style="width:16%" class="num">Stück</th>
+          <th style="width:16%" class="num">ø [mm]</th><th style="width:20%" class="num">Länge [m]</th>
+          <th style="width:14%">fix</th><th style="width:8%"></th>
+        </tr></thead>
+        <tbody>
+        ${L.rows.map((r, ri) => `
+          <tr data-ri="${ri}">
+            <td><input type="text" value="${esc(r.pos)}" data-f="pos"></td>
+            <td><input type="number" value="${r.qty}" min="0" step="1" data-f="qty"></td>
+            <td><input type="number" value="${r.dia}" min="1" step="1" data-f="dia"></td>
+            <td><input type="number" value="${r.len}" min="0" step="0.01" data-f="len"></td>
+            <td style="text-align:center"><input type="checkbox" ${r.fix ? "checked" : ""} data-f="fix"></td>
+            <td style="text-align:right"><button class="mini" data-act="delrow">×</button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+      </div>
+    </div>`).join("");
+  renderDiaSettings();
+}
+
+function diameters() {
+  const s = new Set();
+  state.lists.forEach(L => L.rows.forEach(r => { if (r.dia > 0 && r.qty > 0 && r.len > 0) s.add(+r.dia); }));
+  return [...s].sort((a, b) => a - b);
+}
+
+function renderDiaSettings() {
+  const ds = diameters();
+  if (!ds.length) { $("diaSettings").innerHTML = ""; return; }
+  $("diaSettings").innerHTML = `
+    <h3>Material je Durchmesser</h3>
+    <div class="row" id="diaRow">
+      ${ds.map(d => {
+        const cfg = state.dia[d] || {};
+        return `<div style="border:1px solid var(--line); border-radius:8px; padding:8px 10px" data-dia="${d}">
+          <div style="font-weight:600; margin-bottom:4px">ø ${d} mm</div>
+          <label class="f">Lagerlänge [m]
+            <input type="number" step="0.01" min="0.5" style="width:100px" data-dcfg="stock"
+                   value="${cfg.stock != null ? cfg.stock : ""}" placeholder="${NF(state.stockDefault, 2)}">
+          </label>
+          <label class="small" style="display:flex; gap:6px; align-items:center; margin-top:6px; color:var(--muted)">
+            <input type="checkbox" data-dcfg="ring" ${cfg.ring ? "checked" : ""}> aus Ring (kein Verschnitt)
+          </label>
+        </div>`;
+      }).join("")}
+    </div>`;
+}
+
+$("lists").addEventListener("input", e => {
+  const card = e.target.closest("[data-li]"); if (!card) return;
+  const li = +card.dataset.li;
+  if (e.target.dataset.act === "name") { state.lists[li].name = e.target.value; return; }
+  const tr = e.target.closest("[data-ri]"); if (!tr) return;
+  const ri = +tr.dataset.ri, f = e.target.dataset.f; if (!f) return;
+  const row = state.lists[li].rows[ri];
+  if (f === "fix") row.fix = e.target.checked;
+  else if (f === "pos") row.pos = e.target.value;
+  else row[f] = parseFloat(e.target.value.replace(",", ".")) || 0;
+  if (f === "dia" || f === "qty" || f === "len") renderDiaSettings();
+});
+
+$("lists").addEventListener("click", e => {
+  const act = e.target.dataset.act; if (!act) return;
+  const card = e.target.closest("[data-li]"); const li = +card.dataset.li;
+  if (act === "addrow") { state.lists[li].rows.push({ pos: "", qty: 1, dia: 12, len: 1, fix: false }); renderLists(); }
+  if (act === "dellist") { state.lists.splice(li, 1); renderLists(); }
+  if (act === "delrow") { const ri = +e.target.closest("[data-ri]").dataset.ri; state.lists[li].rows.splice(ri, 1); renderLists(); }
+});
+
+$("diaSettings").addEventListener("input", e => {
+  const box = e.target.closest("[data-dia]"); if (!box) return;
+  const d = +box.dataset.dia, k = e.target.dataset.dcfg;
+  state.dia[d] = state.dia[d] || {};
+  if (k === "ring") state.dia[d].ring = e.target.checked;
+  if (k === "stock") { const v = parseFloat(e.target.value.replace(",", ".")); state.dia[d].stock = isFinite(v) && v > 0 ? v : null; }
+});
+
+$("stockDefault").addEventListener("input", e => { state.stockDefault = parseFloat(e.target.value.replace(",", ".")) || 12; renderDiaSettings(); });
+$("minRest").addEventListener("input", e => { state.minRest = parseFloat(e.target.value.replace(",", ".")) || 0; });
+$("btnAddList").onclick = () => { state.lists.push({ name: "Neue Stückliste", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }); renderLists(); };
+$("btnDemo").onclick = () => { state = JSON.parse(JSON.stringify(DEMO)); $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest; renderLists(); $("out").innerHTML = ""; };
+$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, lists: [{ name: "Stückliste 1", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; renderLists(); $("out").innerHTML = ""; };
+$("btnPrint").onclick = () => window.print();
+$("btnExport").onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "schneideplan-daten.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$("btnImport").onclick = () => $("fileImport").click();
+$("fileImport").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const d = JSON.parse(rd.result);
+      if (!d.lists) throw 0;
+      state = Object.assign({ stockDefault: 12, minRest: 1, dia: {} }, d);
+      $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest;
+      renderLists(); $("out").innerHTML = "";
+    } catch (_) { alert("Datei konnte nicht gelesen werden."); }
+  };
+  rd.readAsText(f);
+});
+
+/* ---------- Optimierung (1D-Cutting-Stock) ---------- */
+
+// Exakte Suche (Branch & Bound) nach dem best gefüllten Muster für eine Stange.
+function bestPattern(lens, avail, cap, budget) {
+  const n = lens.length, cur = new Array(n).fill(0);
+  let best = -1, bestCounts = new Array(n).fill(0), nodes = 0;
+  function dfs(i, rem, fill) {
+    if (fill > best) { best = fill; bestCounts = cur.slice(); }
+    if (best === cap) return true;
+    if (i >= n) return false;
+    if (fill + rem <= best) return false;
+    if (++nodes > budget) return true;
+    const kmax = Math.min(avail[i], Math.floor(rem / lens[i]));
+    for (let k = kmax; k >= 0; k--) {
+      cur[i] = k;
+      if (dfs(i + 1, rem - k * lens[i], fill + k * lens[i])) { cur[i] = 0; return true; }
+    }
+    cur[i] = 0;
+    return false;
+  }
+  dfs(0, cap, 0);
+  return bestCounts;
+}
+
+// Sequentielle Heuristik: immer das beste Muster wählen und (optional) maximal oft wiederholen.
+function greedyPatterns(buckets, cap, budget, repeat) {
+  const lens = buckets.map(b => b.len), avail = buckets.map(b => b.qty), bars = [];
+  let guard = 0;
+  while (avail.some(a => a > 0)) {
+    if (++guard > 20000) break;
+    const pat = bestPattern(lens, avail, cap, budget);
+    if (!pat.some(k => k > 0)) break;
+    let reps = 1;
+    if (repeat) {
+      reps = Infinity;
+      pat.forEach((k, i) => { if (k > 0) reps = Math.min(reps, Math.floor(avail[i] / k)); });
+      reps = Math.max(1, reps);
+    }
+    const bar = [];
+    pat.forEach((k, i) => { for (let j = 0; j < k; j++) bar.push(lens[i]); });
+    for (let r = 0; r < reps; r++) bars.push(bar.slice());
+    pat.forEach((k, i) => { avail[i] -= k * reps; });
+  }
+  return bars;
+}
+
+// Best-Fit-Decreasing, optional leicht randomisiert (für Mehrfachstarts).
+function bfd(pieces, cap, jitter) {
+  const arr = pieces.slice().sort((a, b) => b - a);
+  if (jitter) {
+    for (let i = 0; i < arr.length; i++) {
+      if (Math.random() < 0.35) {
+        const j = Math.min(arr.length - 1, i + 1 + Math.floor(Math.random() * 3));
+        const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+      }
+    }
+  }
+  const bars = [], rem = [];
+  for (const p of arr) {
+    let bi = -1, bestRem = Infinity;
+    for (let i = 0; i < bars.length; i++) if (rem[i] >= p && rem[i] - p < bestRem) { bestRem = rem[i] - p; bi = i; }
+    if (bi < 0) { bars.push([p]); rem.push(cap - p); } else { bars[bi].push(p); rem[bi] -= p; }
+  }
+  return bars;
+}
+
+// Bewertung: primär Stangenanzahl, sekundär möglichst großes (=verwertbares) Reststück.
+function score(bars, cap) {
+  let maxRest = 0;
+  for (const b of bars) { const r = cap - b.reduce((s, x) => s + x, 0); if (r > maxRest) maxRest = r; }
+  return [bars.length, -maxRest];
+}
+const better = (a, b) => a[0] !== b[0] ? a[0] < b[0] : a[1] < b[1];
+
+function solveGroup(buckets, cap, restarts, budget) {
+  const pieces = [];
+  buckets.forEach(b => { for (let i = 0; i < b.qty; i++) pieces.push(b.len); });
+  if (!pieces.length) return [];
+  let best = greedyPatterns(buckets, cap, budget, true), bestScore = score(best, cap);
+  for (const cand of [greedyPatterns(buckets, cap, budget, false), bfd(pieces, cap, false)]) {
+    const cs = score(cand, cap);
+    if (better(cs, bestScore)) { best = cand; bestScore = cs; }
+  }
+  for (let it = 0; it < restarts; it++) {
+    const c = bfd(pieces, cap, true), s = score(c, cap);
+    if (better(s, bestScore)) { best = c; bestScore = s; }
+  }
+  best.forEach(b => b.sort((a, x) => x - a));
+  best.sort((a, b) => (b.reduce((s, x) => s + x, 0)) - (a.reduce((s, x) => s + x, 0)));
+  return best;
+}
+
+/* ---------- Berechnung + Ausgabe ---------- */
+function calc() {
+  const effort = +$("effort").value;
+  const restarts = effort === 1 ? 60 : effort === 2 ? 400 : 1500;
+  const budget = effort === 1 ? 20000 : effort === 2 ? 120000 : 600000;
+  const looRestarts = effort === 1 ? 20 : effort === 2 ? 60 : 200;
+  const minRest = mm(state.minRest);
+
+  // Positionen einsammeln
+  const items = [], errors = [];
+  state.lists.forEach((L, li) => L.rows.forEach((r, ri) => {
+    const qty = Math.round(+r.qty || 0), dia = +r.dia || 0, len = +r.len || 0;
+    if (qty <= 0 || dia <= 0 || len <= 0) return;
+    items.push({
+      key: li + ":" + ri, list: L.name, listIx: li, pos: r.pos || "?",
+      label: listShort(li) + "·" + (r.pos || "?"),
+      qty, dia, lenM: len, len: mm(len), fix: !!r.fix
+    });
+  }));
+  // Mehrere Zeilen mit gleicher Positionsnummer eindeutig kennzeichnen (z. B. UZ6a / UZ6b)
+  const seen = new Map();
+  items.forEach(it => seen.set(it.label, (seen.get(it.label) || 0) + 1));
+  const used = new Map();
+  items.forEach(it => {
+    if (seen.get(it.label) > 1) {
+      const n = (used.get(it.label) || 0); used.set(it.label, n + 1);
+      it.pos = it.pos + String.fromCharCode(97 + n);
+      it.label = it.label + String.fromCharCode(97 + n);
+    }
+  });
+  if (!items.length) { $("out").innerHTML = `<div class="panel"><p class="note bad">Keine gültigen Positionen erfasst.</p></div>`; return; }
+
+  const stockOf = d => mm((state.dia[d] && state.dia[d].stock) || state.stockDefault);
+  const ringOf = d => !!(state.dia[d] && state.dia[d].ring);
+
+  items.forEach(it => {
+    if (!it.fix && !ringOf(it.dia) && it.len > stockOf(it.dia))
+      errors.push(`${it.label}: Einzellänge ${NF(it.lenM)} m > Lagerlänge ${NF(m(stockOf(it.dia)))} m — Stoß erforderlich oder Fixlänge bestellen.`);
+  });
+
+  // Gruppierung nach ø
+  const groups = new Map();
+  items.forEach(it => {
+    if (!groups.has(it.dia)) groups.set(it.dia, { dia: it.dia, cap: stockOf(it.dia), ring: ringOf(it.dia), items: [] });
+    groups.get(it.dia).items.push(it);
+  });
+
+  const results = [];
+  for (const g of [...groups.values()].sort((a, b) => a.dia - b.dia)) {
+    const cut = g.items.filter(it => !it.fix && !g.ring && it.len <= g.cap);
+    const fixed = g.items.filter(it => it.fix || g.ring || it.len > g.cap);
+
+    // Längen-Buckets (gleiche Längen sind untereinander austauschbar)
+    const bmap = new Map();
+    cut.forEach(it => {
+      if (!bmap.has(it.len)) bmap.set(it.len, { len: it.len, qty: 0, src: [] });
+      const b = bmap.get(it.len); b.qty += it.qty; b.src.push({ it, qty: it.qty });
+    });
+    const buckets = [...bmap.values()].sort((a, b) => b.len - a.len);
+
+    const barsRaw = buckets.length ? solveGroup(buckets, g.cap, restarts, budget) : [];
+
+    // Stücke wieder den Positionen zuordnen (Warteschlange je Länge, positionsweise)
+    const queue = new Map();
+    buckets.forEach(b => {
+      const q = [];
+      b.src.forEach(s => { for (let i = 0; i < s.qty; i++) q.push(s.it); });
+      queue.set(b.len, q);
+    });
+    const bars = barsRaw.map((piecesLen, bi) => {
+      const pieces = piecesLen.map(L => ({ len: L, it: queue.get(L).shift() }));
+      const used = pieces.reduce((s, p) => s + p.len, 0);
+      return { id: `S${g.dia}-${String(bi + 1).padStart(3, "0")}`, pieces, used, rest: g.cap - used };
+    });
+
+    const totalNeed = cut.reduce((s, it) => s + it.qty * it.len, 0);
+    const totalStock = bars.length * g.cap;
+    const wasteAll = totalStock - totalNeed;
+
+    // Verschnitt-Analyse je Position
+    const analysis = cut.map(it => {
+      const perBar = Math.floor(g.cap / it.len);
+      const barsAlone = Math.ceil(it.qty / perBar);
+      const wasteAlone = barsAlone * g.cap - it.qty * it.len;
+      // Grenzbeitrag: Plan ohne diese Position neu rechnen
+      const bm2 = new Map();
+      cut.forEach(o => {
+        if (o === it) return;
+        if (!bm2.has(o.len)) bm2.set(o.len, { len: o.len, qty: 0, src: [] });
+        bm2.get(o.len).qty += o.qty;
+      });
+      const b2 = [...bm2.values()].sort((a, b) => b.len - a.len);
+      const bars2 = b2.length ? solveGroup(b2, g.cap, looRestarts, budget) : [];
+      const need2 = cut.reduce((s, o) => s + (o === it ? 0 : o.qty * o.len), 0);
+      const waste2 = bars2.length * g.cap - need2;
+      const marginal = wasteAll - waste2;
+      return {
+        it, perBar, barsAlone,
+        wasteAlone, wasteAloneRatio: wasteAlone / (barsAlone * g.cap || 1),
+        marginal,
+        wasteBars: marginal / g.cap,                    // Verschnitt in "ganzen Lagerstangen"
+        ownRatio: marginal / (it.qty * it.len),         // Verschnitt bezogen auf eigenen Bedarf
+        mass: it.qty * it.lenM * kgPerM(it.dia)
+      };
+    }).sort((a, b) => b.marginal - a.marginal || b.wasteAlone - a.wasteAlone);
+
+    results.push({
+      g, bars, cut, fixed, analysis,
+      totalNeed, totalStock, wasteAll,
+      lower: Math.ceil(totalNeed / g.cap),
+      usableRest: bars.filter(b => b.rest >= minRest && b.rest > 0),
+      kgm: kgPerM(g.dia)
+    });
+  }
+  render(results, errors, minRest);
+}
+
+/* ---------- Ausgabe ---------- */
+function colorFor(ix) { return `hsl(${(ix * 47 + 14) % 360} 62% 68%)`; }
+
+function render(results, errors, minRest) {
+  const out = [];
+
+  // Gesamtübersicht
+  let gStock = 0, gNeed = 0, gWaste = 0, gBars = 0, gFixKg = 0;
+  results.forEach(R => {
+    gStock += R.totalStock * R.kgm / 1000; gNeed += R.totalNeed * R.kgm / 1000;
+    gWaste += R.wasteAll * R.kgm / 1000; gBars += R.bars.length;
+    R.fixed.forEach(it => gFixKg += it.qty * it.lenM * R.kgm);
+  });
+
+  out.push(`<div class="panel">
+    <h2>Ergebnis — Gesamtübersicht</h2>
+    ${errors.length ? `<div class="note bad"><b>Hinweise:</b><br>${errors.map(esc).join("<br>")}</div>` : ""}
+    <div class="cards">
+      <div class="kpi"><div class="k">Lagerstangen gesamt</div><div class="v">${NF0(gBars)} Stk</div><div class="n">über alle Durchmesser</div></div>
+      <div class="kpi"><div class="k">Materialeinsatz</div><div class="v">${NF(gStock, 1)} kg</div><div class="n">Bedarf netto ${NF(gNeed, 1)} kg</div></div>
+      <div class="kpi"><div class="k">Verschnitt</div><div class="v">${NF(gWaste, 1)} kg</div><div class="n">${NF(gStock ? gWaste / gStock * 100 : 0, 1)} % vom Einsatz</div></div>
+      ${gFixKg ? `<div class="kpi"><div class="k">Fixlängen / Ring</div><div class="v">${NF(gFixKg, 1)} kg</div><div class="n">ohne Schneideverschnitt</div></div>` : ""}
+    </div>
+  </div>`);
+
+  // Bestellliste
+  out.push(`<div class="panel">
+    <h3>Bestellung Lagerstangen</h3>
+    <div class="tbl-scroll"><table>
+      <thead><tr><th>ø</th><th class="num">Lagerlänge</th><th class="num">Stangen</th><th class="num">Gesamtlänge</th><th class="num">Masse</th><th class="num">Verschnitt</th></tr></thead>
+      <tbody>${results.map(R => `<tr>
+        <td><b>ø ${R.g.dia}</b>${R.g.ring ? ` <span class="tag ok">Ring</span>` : ""}</td>
+        <td class="num">${NF(m(R.g.cap))} m</td>
+        <td class="num"><b>${NF0(R.bars.length)}</b></td>
+        <td class="num">${NF(m(R.totalStock), 1)} m</td>
+        <td class="num">${NF(R.totalStock * R.kgm / 1000, 1)} kg</td>
+        <td class="num">${NF(m(R.wasteAll), 2)} m · ${NF(R.wasteAll * R.kgm / 1000, 1)} kg
+          <span class="muted">(${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span></td>
+      </tr>`).join("")}</tbody>
+    </table></div>
+  </div>`);
+
+  // Detail je Durchmesser
+  results.forEach(R => {
+    const ix = new Map(); R.cut.forEach((it, i) => ix.set(it.key, i));
+    out.push(`<div class="panel">
+      <div class="grp-title">
+        <span class="d">ø ${R.g.dia} mm</span>
+        <span class="muted small">Lagerlänge ${NF(m(R.g.cap))} m · ${R.bars.length} Stangen · Verschnitt ${NF(m(R.wasteAll), 2)} m (${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span>
+        ${R.bars.length === R.lower ? `<span class="tag ok">optimal — Materialschranke erreicht</span>` :
+          `<span class="tag warn">rechn. Untergrenze ${R.lower} Stangen (durch die Längenkombination nicht immer erreichbar)</span>`}
+      </div>`);
+
+    if (R.fixed.length) {
+      out.push(`<div class="note">Nicht im Schneideplan (Fixlänge/Ring/zu lang):
+        ${R.fixed.map(it => `${esc(it.label)} — ${it.qty}× ${NF(it.lenM)} m`).join(" · ")}</div>`);
+    }
+
+    if (!R.bars.length) { out.push(`</div>`); return; }
+
+    // Musterübersicht (kompakt, für Zuschnitt und Bestellung)
+    const pat = new Map();
+    R.bars.forEach(b => {
+      const k = b.pieces.map(p => p.len).join("+");
+      if (!pat.has(k)) pat.set(k, { lens: b.pieces.map(p => p.len), n: 0, rest: b.rest, ids: [] });
+      const e = pat.get(k); e.n++; e.ids.push(b.id);
+    });
+    out.push(`<h3>Schnittmuster — Übersicht</h3>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th class="num">Anzahl</th><th>Schnittmuster je ${NF(m(R.g.cap))} m Stange</th><th class="num">Rest</th><th class="num">Verschnitt gesamt</th></tr></thead>
+        <tbody>${[...pat.values()].sort((a, b) => b.n - a.n).map(e => `<tr>
+          <td class="num"><b>${e.n}×</b></td>
+          <td>${e.lens.map(L => NF(m(L))).join(" + ")}</td>
+          <td class="num">${NF(m(e.rest))} m</td>
+          <td class="num">${NF(m(e.rest * e.n), 2)} m</td>
+        </tr>`).join("")}</tbody>
+      </table></div>`);
+
+    // Schneideplan — identische Stangen optional zu einem Eintrag zusammenfassen
+    const group = $("groupSame").checked;
+    const shown = [];
+    if (group) {
+      const gm = new Map();
+      R.bars.forEach(b => {
+        const k = b.pieces.map(p => p.it.key + "@" + p.len).join("|");
+        if (!gm.has(k)) { gm.set(k, Object.assign({}, b, { ids: [] })); }
+        gm.get(k).ids.push(b.id);
+      });
+      shown.push(...gm.values());
+    } else {
+      R.bars.forEach(b => shown.push(Object.assign({}, b, { ids: [b.id] })));
+    }
+    out.push(`<h3 style="margin-top:18px">Schneideplan — Stange für Stange${group && shown.length < R.bars.length ? ` <span class="muted" style="text-transform:none; letter-spacing:0">(${R.bars.length} Stangen in ${shown.length} identischen Gruppen)</span>` : ""}</h3>`);
+    shown.forEach(b => {
+      const segs = b.pieces.map(p => {
+        const share = p.len / R.g.cap;
+        const txt = share >= 0.14 ? `${esc(p.it.label)} · ${NF(m(p.len))}` : share >= 0.07 ? NF(m(p.len)) : "";
+        return `<div class="seg" style="flex:${p.len} 0 0; background:${colorFor(ix.get(p.it.key))}" title="${esc(p.it.label)} · ${NF(m(p.len))} m">${txt}</div>`;
+      }).join("");
+      const restSeg = b.rest > 0
+        ? `<div class="seg rest" style="flex:${b.rest} 0 0" title="Rest ${NF(m(b.rest))} m">${b.rest / R.g.cap >= 0.09 ? "Rest " + NF(m(b.rest)) : ""}</div>`
+        : "";
+      const counts = new Map();
+      b.pieces.forEach(p => { const k = p.it.label + "|" + p.len; counts.set(k, (counts.get(k) || 0) + 1); });
+      const ids = b.ids, rangeTxt = ids.length === 1 ? ids[0]
+        : (ids.length > 2 ? `${ids[0]} – ${ids[ids.length - 1]}` : ids.join(", "));
+      out.push(`<div class="bar">
+        <div class="bar-head">
+          <span>${ids.length > 1 ? `<b>${ids.length}× Stangen</b> <span class="muted">${rangeTxt}</span>` : `<b>${ids[0]}</b>`}
+            &nbsp;<span class="muted">${NF(m(R.g.cap))} m</span></span>
+          <span>genutzt ${NF(m(b.used))} m · <span style="color:${b.rest >= minRest ? "var(--warn)" : "var(--muted)"}">Rest ${NF(m(b.rest))} m${b.rest >= minRest && b.rest > 0 ? " ↺ verwertbar" : ""}${ids.length > 1 ? ` (gesamt ${NF(m(b.rest * ids.length), 2)} m)` : ""}</span></span>
+        </div>
+        <div class="bar-vis">${segs}${restSeg}</div>
+        <div class="chips">${[...counts.entries()].map(([k, n]) => {
+          const [lab, L] = k.split("|");
+          return `<span class="chip">${n}× ${esc(lab)} &nbsp;${NF(m(+L))} m${ids.length > 1 ? ` <span class="muted">(je Stange)</span>` : ""}</span>`;
+        }).join("")}</div>
+      </div>`);
+    });
+
+    // Zuordnung Position -> Stangen
+    out.push(`<h3 style="margin-top:18px">Zuordnung der Stücke zu den Positionen</h3>
+      <div class="tbl-scroll"><table>
+        <thead><tr><th>Position</th><th>Stückliste</th><th class="num">Länge</th><th class="num">Stück</th><th>geschnitten aus Stange</th></tr></thead>
+        <tbody>${R.cut.map(it => {
+          const src = new Map();
+          R.bars.forEach(b => b.pieces.forEach(p => { if (p.it.key === it.key) src.set(b.id, (src.get(b.id) || 0) + 1); }));
+          return `<tr>
+            <td><span class="chip" style="background:${colorFor(ix.get(it.key))}; color:#10131a; border:none">${esc(it.label)}</span></td>
+            <td class="small muted">${esc(it.list)} · Pos. ${esc(it.pos)}</td>
+            <td class="num">${NF(it.lenM)} m</td>
+            <td class="num">${it.qty}</td>
+            <td class="small">${[...src.entries()].map(([id, n]) => `${id}<span class="muted">&nbsp;(${n}×)</span>`).join(", ")}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table></div>`);
+
+    // Reststücke
+    if (R.usableRest.length) {
+      out.push(`<details><summary>${R.usableRest.length} verwertbare Reststücke ≥ ${NF(m(minRest))} m</summary>
+        <div class="chips" style="margin-top:6px">${R.usableRest.map(b => `<span class="chip">${b.id}: ${NF(m(b.rest))} m</span>`).join("")}</div>
+      </details>`);
+    }
+    out.push(`</div>`);
+  });
+
+  // Verschnittverursacher
+  out.push(renderWasteRanking(results));
+  $("out").innerHTML = out.join("");
+  $("out").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function renderWasteRanking(results) {
+  const rows = [];
+  results.forEach(R => R.analysis.forEach(a => rows.push({ R, a })));
+  if (!rows.length) return "";
+  rows.sort((x, y) => (y.a.marginal * y.R.kgm) - (x.a.marginal * x.R.kgm) || y.a.wasteAlone - x.a.wasteAlone);
+
+  // Fixlänge lohnt erst, wenn der einsparbare Verschnitt mind. eine ganze Lagerstange ausmacht.
+  const worth = r => r.a.marginal >= r.R.g.cap && r.a.ownRatio >= 0.05;
+  const top = rows.filter(r => r.a.marginal > 0).slice(0, 3);
+  let rec;
+  if (!rows.some(worth)) {
+    const t = top[0];
+    rec = t ? `<div class="note">
+      Kein Kandidat für eine Fixlängen-Bestellung: der größte Verschnitttreiber ist
+      <b>${esc(t.a.it.label)}</b> (${t.a.it.qty}× ${NF(t.a.it.lenM)} m, ø ${t.a.it.dia}) mit nur
+      <b>${NF(m(t.a.marginal), 2)} m</b> Mehrverschnitt (${NF(t.a.marginal * t.R.kgm / 1000, 1)} kg) —
+      das ist weniger als eine Lagerstange. Alle Positionen selbst schneiden.
+    </div>` : "";
+  } else if (!top.length) {
+    rec = `<div class="note ok" style="border-color:var(--ok); background:var(--ok-soft)">
+      Keine Position verursacht rechnerisch zusätzlichen Verschnitt — die Längen lassen sich untereinander gut kombinieren.
+      Selbst schneiden ist hier durchwegs günstiger als Fixlängen zu bestellen.</div>`;
+  } else {
+    const t = rows.filter(worth)[0];
+    const others = top.filter(r => r !== t).slice(0, 2);
+    rec = `<div class="note warn">
+      <b>Empfehlung:</b> Position <b>${esc(t.a.it.label)}</b> (ø ${t.a.it.dia}, ${t.a.it.qty}× ${NF(t.a.it.lenM)} m,
+      ${esc(t.a.it.list)}) ist der mit Abstand größte Verschnitttreiber: sie erhöht den Verschnitt um
+      <b>${NF(m(t.a.marginal), 2)} m</b> = <b>${NF(t.a.marginal * t.R.kgm / 1000, 1)} kg</b>
+      — das entspricht ${NF(t.a.wasteBars, 1)} Lagerstangen, die als reiner Abfall gekauft werden.
+      Grund: aus ${NF(m(t.R.g.cap))} m gehen nur ${t.a.perBar} Stück à ${NF(t.a.it.lenM)} m,
+      der verbleibende Rest lässt sich mit den übrigen Längen kaum füllen.
+      <b>Diese Position in Fixlänge ${NF(t.a.it.lenM)} m ab Werk bestellen</b> — dann entfällt der Anteil vollständig.
+      ${others.length ? `Danach folgen ${others.map(r => `<b>${esc(r.a.it.label)}</b> (+${NF(m(r.a.marginal), 2)} m)`).join(" und ")}; dort lohnt der Aufwand nicht, das bleibt Schnittware.` : ""}
+      <br><span class="small">Zum Nachrechnen: Häkchen <b>fix</b> bei der Position setzen und neu berechnen.</span>
+    </div>`;
+  }
+
+  return `<div class="panel">
+    <h2>Verschnitt-Analyse je Position</h2>
+    ${rec}
+    <div class="tbl-scroll"><table>
+      <thead><tr>
+        <th>Position</th><th class="num">ø</th><th class="num">Stück × Länge</th>
+        <th class="num">Grenz-Verschnitt</th><th class="num">alleine geschnitten</th>
+        <th class="num">Stk/Stange</th><th>Bewertung</th>
+      </tr></thead>
+      <tbody>${rows.map(({ R, a }) => {
+        const marg = m(a.marginal), margKg = a.marginal * R.kgm / 1000;
+        const w = worth({ R, a });
+        const cls = w ? "bad" : a.marginal > 0 ? "warn" : "ok";
+        const txt = w ? "Fixlänge bestellen" : a.marginal > 0 ? "selbst schneiden" : "Füller — reduziert Verschnitt";
+        return `<tr>
+          <td><b>${esc(a.it.label)}</b> <span class="small muted">${esc(a.it.list)}</span></td>
+          <td class="num">${a.it.dia}</td>
+          <td class="num">${a.it.qty} × ${NF(a.it.lenM)} m</td>
+          <td class="num">${marg > 0 ? "+" : ""}${NF(marg, 2)} m<br><span class="small muted">${margKg > 0 ? "+" : ""}${NF(margKg, 1)} kg</span></td>
+          <td class="num">${NF(m(a.wasteAlone), 2)} m<br><span class="small muted">${NF(a.wasteAloneRatio * 100, 1)} %</span></td>
+          <td class="num">${a.perBar}</td>
+          <td><span class="tag ${cls}">${txt}</span></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table></div>
+    <p class="small muted" style="margin:10px 0 0">
+      <b>Grenz-Verschnitt</b> = Mehrverschnitt, den diese Position im Gesamtplan verursacht
+      (Plan mit dieser Position minus Plan ohne sie). Das ist das entscheidende Kriterium:
+      nur dieser Anteil lässt sich durch eine Fixlängen-Bestellung tatsächlich einsparen.
+      Ein <b>negativer</b> Wert heißt: die Position füllt die Reste der anderen Positionen auf und senkt den Gesamtverschnitt.
+      Als Fixlänge empfohlen wird erst, was mindestens eine ganze Lagerstange an Verschnitt verursacht.
+      <b>Alleine geschnitten</b> zeigt den Verschnitt, wenn die Position ohne Kombination mit anderen Längen
+      aus der Lagerstange geschnitten würde — hohe Werte hier bei gleichzeitig niedrigem Grenz-Verschnitt bedeuten:
+      die Position wird von anderen Positionen „aufgefangen“ und ist unkritisch.
+    </p>
+  </div>`;
+}
+
+$("btnCalc").onclick = () => { $("btnCalc").textContent = "rechnet …"; setTimeout(() => { try { calc(); } finally { $("btnCalc").textContent = "Schneideplan berechnen"; } }, 20); };
+
+renderLists();
+</script>
