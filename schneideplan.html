@@ -132,7 +132,7 @@
     <h2>1 · Einstellungen</h2>
     <div class="row">
       <label class="f">Lagerlänge Standard [m]
-        <input type="number" id="stockDefault" value="12" step="0.01" min="0.5" style="width:110px">
+        <input type="number" id="stockDefault" value="7" step="0.01" min="0.5" style="width:110px">
       </label>
       <label class="f">Mind. verwertbares Reststück [m]
         <input type="number" id="minRest" value="1.00" step="0.05" min="0" style="width:130px">
@@ -156,7 +156,20 @@
   </div>
 
   <div class="panel no-print">
-    <h2>2 · Stücklisten</h2>
+    <h2>2 · Vorhandene Reststangen <span class="muted" style="font-weight:400; font-size:14px">(optional)</span></h2>
+    <p class="small muted" style="margin:-6px 0 10px">
+      Verwertbare Reste aus früheren Schnitten, die noch am Lager liegen. Sie werden nur dann herangezogen,
+      wenn dadurch tatsächlich neue Stangen eingespart werden — sonst bleiben sie unangetastet im Lager.
+      Was nach dem Schnitt von einer Reststange übrig bleibt, wird wieder als Rest ausgewiesen.
+    </p>
+    <div class="tbl-scroll" id="rests"></div>
+    <div class="btnbar" style="margin-top:10px">
+      <button id="btnAddRest">+ Reststange</button>
+    </div>
+  </div>
+
+  <div class="panel no-print">
+    <h2>3 · Stücklisten</h2>
     <div id="lists"></div>
     <div class="btnbar" style="margin-top:10px">
       <button id="btnAddList">+ Stückliste</button>
@@ -190,8 +203,8 @@ const m = x => x / 1000;
 
 /* ---------- Zustand ---------- */
 const DEMO = {
-  stockDefault: 12, minRest: 1.0,
-  dia: {},
+  stockDefault: 7, minRest: 1.0,
+  dia: {}, rests: [],
   lists: [
     {
       name: "Stoßüberdeckung / Zulageeisen auf Platten",
@@ -273,8 +286,48 @@ function renderLists() {
       </table>
       </div>
     </div>`).join("");
+  renderRests();
   renderDiaSettings();
 }
+
+function renderRests() {
+  const host = $("rests");
+  if (!state.rests) state.rests = [];
+  if (!state.rests.length) {
+    host.innerHTML = `<p class="small muted" style="margin:0">Keine Reststangen erfasst — es wird ausschließlich von neuen Lagerstangen geschnitten.</p>`;
+    return;
+  }
+  host.innerHTML = `<table class="rowtable">
+    <thead><tr>
+      <th style="width:22%" class="num">ø [mm]</th><th style="width:28%" class="num">Länge [m]</th>
+      <th style="width:22%" class="num">Stück</th><th style="width:20%">Bemerkung</th><th style="width:8%"></th>
+    </tr></thead>
+    <tbody>${state.rests.map((r, i) => `<tr data-rest="${i}">
+      <td><input type="number" value="${r.dia}" min="1" step="1" data-f="dia"></td>
+      <td><input type="number" value="${r.len}" min="0" step="0.01" data-f="len"></td>
+      <td><input type="number" value="${r.qty}" min="0" step="1" data-f="qty"></td>
+      <td><input type="text" value="${esc(r.note || "")}" data-f="note" placeholder="Lagerplatz …"></td>
+      <td style="text-align:right"><button class="mini" data-act="delrest">×</button></td>
+    </tr>`).join("")}</tbody></table>`;
+}
+
+$("rests").addEventListener("input", e => {
+  const tr = e.target.closest("[data-rest]"); if (!tr) return;
+  const r = state.rests[+tr.dataset.rest], f = e.target.dataset.f; if (!f) return;
+  if (f === "note") r.note = e.target.value;
+  else r[f] = parseFloat(e.target.value.replace(",", ".")) || 0;
+  if (f === "dia") renderDiaSettings();
+});
+$("rests").addEventListener("click", e => {
+  if (e.target.dataset.act !== "delrest") return;
+  state.rests.splice(+e.target.closest("[data-rest]").dataset.rest, 1);
+  renderRests();
+});
+$("btnAddRest").onclick = () => {
+  const ds = diameters();
+  state.rests.push({ dia: ds[0] || 12, len: 3, qty: 1, note: "" });
+  renderRests(); renderDiaSettings();
+};
 
 function diameters() {
   const s = new Set();
@@ -337,7 +390,7 @@ $("stockDefault").addEventListener("input", e => { state.stockDefault = parseFlo
 $("minRest").addEventListener("input", e => { state.minRest = parseFloat(e.target.value.replace(",", ".")) || 0; });
 $("btnAddList").onclick = () => { state.lists.push({ name: "Neue Stückliste", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }); renderLists(); };
 $("btnDemo").onclick = () => { state = JSON.parse(JSON.stringify(DEMO)); $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest; renderLists(); $("out").innerHTML = ""; };
-$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, lists: [{ name: "Stückliste 1", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; renderLists(); $("out").innerHTML = ""; };
+$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, rests: [], lists: [{ name: "Stückliste 1", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; renderLists(); $("out").innerHTML = ""; };
 $("btnPrint").onclick = () => window.print();
 $("btnExport").onclick = () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
@@ -353,7 +406,7 @@ $("fileImport").addEventListener("change", e => {
     try {
       const d = JSON.parse(rd.result);
       if (!d.lists) throw 0;
-      state = Object.assign({ stockDefault: 12, minRest: 1, dia: {} }, d);
+      state = Object.assign({ stockDefault: 7, minRest: 1, dia: {}, rests: [] }, d);
       $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest;
       renderLists(); $("out").innerHTML = "";
     } catch (_) { alert("Datei konnte nicht gelesen werden."); }
@@ -453,6 +506,36 @@ function solveGroup(buckets, cap, restarts, budget) {
   return best;
 }
 
+/* Plant eine Gruppe mit optionalen Reststangen.
+   Reststangen sind Gratismaterial, kosten aber Lagerbestand: sie werden nur eingesetzt,
+   wenn dadurch neue Stangen eingespart werden. Rangfolge: (1) neue Stangen, (2) Anzahl
+   angebrochener Reststangen, (3) verbrauchtes Restmaterial. */
+function planGroup(buckets, cap, remnants, restarts, budget) {
+  const variants = [];
+  for (const ord of (remnants.length ? [null, "asc", "desc"] : [null])) {
+    const lens = buckets.map(b => b.len), avail = buckets.map(b => b.qty), rbars = [];
+    if (ord) {
+      const rs = remnants.slice().sort(ord === "asc" ? (a, b) => a - b : (a, b) => b - a);
+      for (const R of rs) {
+        if (!avail.some(a => a > 0)) break;
+        const pat = bestPattern(lens, avail, R, budget);
+        const pieces = [];
+        pat.forEach((k, j) => { for (let t = 0; t < k; t++) pieces.push(lens[j]); });
+        if (pieces.length) { rbars.push({ cap: R, pieces }); pat.forEach((k, j) => { avail[j] -= k; }); }
+      }
+    }
+    const left = buckets.map((b, i) => ({ len: b.len, qty: avail[i] })).filter(b => b.qty > 0);
+    const nbars = left.length ? solveGroup(left, cap, restarts, budget) : [];
+    const usedFromRest = rbars.reduce((s, b) => s + b.pieces.reduce((t, x) => t + x, 0), 0);
+    variants.push({ rbars, nbars, usedFromRest });
+  }
+  variants.sort((a, b) =>
+    a.nbars.length - b.nbars.length || a.rbars.length - b.rbars.length || a.usedFromRest - b.usedFromRest);
+  const v = variants[0];
+  const cutNew = v.nbars.reduce((s, b) => s + b.reduce((t, x) => t + x, 0), 0);
+  return { barsRest: v.rbars, barsNew: v.nbars, usedFromRest: v.usedFromRest, wasteNew: v.nbars.length * cap - cutNew };
+}
+
 /* ---------- Berechnung + Ausgabe ---------- */
 function calc() {
   const effort = +$("effort").value;
@@ -493,6 +576,15 @@ function calc() {
       errors.push(`${it.label}: Einzellänge ${NF(it.lenM)} m > Lagerlänge ${NF(m(stockOf(it.dia)))} m — Stoß erforderlich oder Fixlänge bestellen.`);
   });
 
+  // Vorhandene Reststangen je ø (stückweise aufgelöst)
+  const restsByDia = new Map();
+  (state.rests || []).forEach(r => {
+    const dia = +r.dia || 0, len = mm(+r.len || 0), qty = Math.round(+r.qty || 0);
+    if (dia <= 0 || len <= 0 || qty <= 0) return;
+    if (!restsByDia.has(dia)) restsByDia.set(dia, []);
+    for (let i = 0; i < qty; i++) restsByDia.get(dia).push(len);
+  });
+
   // Gruppierung nach ø
   const groups = new Map();
   items.forEach(it => {
@@ -512,8 +604,11 @@ function calc() {
       const b = bmap.get(it.len); b.qty += it.qty; b.src.push({ it, qty: it.qty });
     });
     const buckets = [...bmap.values()].sort((a, b) => b.len - a.len);
+    const remnants = (restsByDia.get(g.dia) || []).filter(L => L <= 100000);
 
-    const barsRaw = buckets.length ? solveGroup(buckets, g.cap, restarts, budget) : [];
+    const plan = buckets.length
+      ? planGroup(buckets, g.cap, remnants, restarts, budget)
+      : { barsRest: [], barsNew: [], usedFromRest: 0, wasteNew: 0 };
 
     // Stücke wieder den Positionen zuordnen (Warteschlange je Länge, positionsweise)
     const queue = new Map();
@@ -522,15 +617,20 @@ function calc() {
       b.src.forEach(s => { for (let i = 0; i < s.qty; i++) q.push(s.it); });
       queue.set(b.len, q);
     });
-    const bars = barsRaw.map((piecesLen, bi) => {
+    const mkBar = (piecesLen, id, kind, cap) => {
       const pieces = piecesLen.map(L => ({ len: L, it: queue.get(L).shift() }));
       const used = pieces.reduce((s, p) => s + p.len, 0);
-      return { id: `S${g.dia}-${String(bi + 1).padStart(3, "0")}`, pieces, used, rest: g.cap - used };
-    });
+      return { id, kind, cap, pieces, used, rest: cap - used };
+    };
+    const barsRest = plan.barsRest.map((b, i) => mkBar(b.pieces, `R${g.dia}-${String(i + 1).padStart(2, "0")}`, "rest", b.cap));
+    const barsNew = plan.barsNew.map((p, i) => mkBar(p, `S${g.dia}-${String(i + 1).padStart(3, "0")}`, "neu", g.cap));
+    const bars = [...barsRest, ...barsNew];
 
     const totalNeed = cut.reduce((s, it) => s + it.qty * it.len, 0);
-    const totalStock = bars.length * g.cap;
-    const wasteAll = totalStock - totalNeed;
+    const totalStock = barsNew.length * g.cap;              // neu zu beschaffendes Material
+    const wasteAll = plan.wasteNew;                         // Verschnitt auf neuen Stangen
+    const remnantTotal = remnants.reduce((s, L) => s + L, 0);
+    const restLeftover = barsRest.reduce((s, b) => s + b.rest, 0);
 
     // Verschnitt-Analyse je Position
     const analysis = cut.map(it => {
@@ -545,10 +645,8 @@ function calc() {
         bm2.get(o.len).qty += o.qty;
       });
       const b2 = [...bm2.values()].sort((a, b) => b.len - a.len);
-      const bars2 = b2.length ? solveGroup(b2, g.cap, looRestarts, budget) : [];
-      const need2 = cut.reduce((s, o) => s + (o === it ? 0 : o.qty * o.len), 0);
-      const waste2 = bars2.length * g.cap - need2;
-      const marginal = wasteAll - waste2;
+      const plan2 = b2.length ? planGroup(b2, g.cap, remnants, looRestarts, budget) : { wasteNew: 0 };
+      const marginal = wasteAll - plan2.wasteNew;
       return {
         it, perBar, barsAlone,
         wasteAlone, wasteAloneRatio: wasteAlone / (barsAlone * g.cap || 1),
@@ -560,9 +658,10 @@ function calc() {
     }).sort((a, b) => b.marginal - a.marginal || b.wasteAlone - a.wasteAlone);
 
     results.push({
-      g, bars, cut, fixed, analysis,
+      g, bars, barsNew, barsRest, cut, fixed, analysis,
       totalNeed, totalStock, wasteAll,
-      lower: Math.ceil(totalNeed / g.cap),
+      remnants, remnantTotal, usedFromRest: plan.usedFromRest, restLeftover,
+      lower: Math.ceil(Math.max(0, totalNeed - remnantTotal) / g.cap),
       usableRest: bars.filter(b => b.rest >= minRest && b.rest > 0),
       kgm: kgPerM(g.dia)
     });
@@ -577,10 +676,11 @@ function render(results, errors, minRest) {
   const out = [];
 
   // Gesamtübersicht
-  let gStock = 0, gNeed = 0, gWaste = 0, gBars = 0, gFixKg = 0;
+  let gStock = 0, gNeed = 0, gWaste = 0, gBars = 0, gFixKg = 0, gRestKg = 0, gRestBars = 0;
   results.forEach(R => {
     gStock += R.totalStock * R.kgm / 1000; gNeed += R.totalNeed * R.kgm / 1000;
-    gWaste += R.wasteAll * R.kgm / 1000; gBars += R.bars.length;
+    gWaste += R.wasteAll * R.kgm / 1000; gBars += R.barsNew.length;
+    gRestKg += R.usedFromRest * R.kgm / 1000; gRestBars += R.barsRest.length;
     R.fixed.forEach(it => gFixKg += it.qty * it.lenM * R.kgm);
   });
 
@@ -588,9 +688,10 @@ function render(results, errors, minRest) {
     <h2>Ergebnis — Gesamtübersicht</h2>
     ${errors.length ? `<div class="note bad"><b>Hinweise:</b><br>${errors.map(esc).join("<br>")}</div>` : ""}
     <div class="cards">
-      <div class="kpi"><div class="k">Lagerstangen gesamt</div><div class="v">${NF0(gBars)} Stk</div><div class="n">über alle Durchmesser</div></div>
-      <div class="kpi"><div class="k">Materialeinsatz</div><div class="v">${NF(gStock, 1)} kg</div><div class="n">Bedarf netto ${NF(gNeed, 1)} kg</div></div>
-      <div class="kpi"><div class="k">Verschnitt</div><div class="v">${NF(gWaste, 1)} kg</div><div class="n">${NF(gStock ? gWaste / gStock * 100 : 0, 1)} % vom Einsatz</div></div>
+      <div class="kpi"><div class="k">Neue Lagerstangen</div><div class="v">${NF0(gBars)} Stk</div><div class="n">zu bestellen, über alle ø</div></div>
+      <div class="kpi"><div class="k">Materialeinsatz neu</div><div class="v">${NF(gStock, 1)} kg</div><div class="n">Bedarf netto ${NF(gNeed, 1)} kg</div></div>
+      <div class="kpi"><div class="k">Verschnitt</div><div class="v">${NF(gWaste, 1)} kg</div><div class="n">${NF(gStock ? gWaste / gStock * 100 : 0, 1)} % vom Neumaterial</div></div>
+      ${gRestBars ? `<div class="kpi" style="border-color:var(--ok)"><div class="k">Aus Reststangen gedeckt</div><div class="v" style="color:var(--ok)">${NF(gRestKg, 1)} kg</div><div class="n">${gRestBars} Reststange${gRestBars > 1 ? "n" : ""} angebrochen</div></div>` : ""}
       ${gFixKg ? `<div class="kpi"><div class="k">Fixlängen / Ring</div><div class="v">${NF(gFixKg, 1)} kg</div><div class="n">ohne Schneideverschnitt</div></div>` : ""}
     </div>
   </div>`);
@@ -599,13 +700,14 @@ function render(results, errors, minRest) {
   out.push(`<div class="panel">
     <h3>Bestellung Lagerstangen</h3>
     <div class="tbl-scroll"><table>
-      <thead><tr><th>ø</th><th class="num">Lagerlänge</th><th class="num">Stangen</th><th class="num">Gesamtlänge</th><th class="num">Masse</th><th class="num">Verschnitt</th></tr></thead>
+      <thead><tr><th>ø</th><th class="num">Lagerlänge</th><th class="num">neue Stangen</th><th class="num">Gesamtlänge</th><th class="num">Masse</th><th class="num">aus Reststangen</th><th class="num">Verschnitt</th></tr></thead>
       <tbody>${results.map(R => `<tr>
         <td><b>ø ${R.g.dia}</b>${R.g.ring ? ` <span class="tag ok">Ring</span>` : ""}</td>
         <td class="num">${NF(m(R.g.cap))} m</td>
-        <td class="num"><b>${NF0(R.bars.length)}</b></td>
+        <td class="num"><b>${NF0(R.barsNew.length)}</b></td>
         <td class="num">${NF(m(R.totalStock), 1)} m</td>
         <td class="num">${NF(R.totalStock * R.kgm / 1000, 1)} kg</td>
+        <td class="num">${R.usedFromRest ? `<span style="color:var(--ok)">${NF(m(R.usedFromRest), 2)} m</span> <span class="muted">(${R.barsRest.length})</span>` : `<span class="muted">—</span>`}</td>
         <td class="num">${NF(m(R.wasteAll), 2)} m · ${NF(R.wasteAll * R.kgm / 1000, 1)} kg
           <span class="muted">(${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span></td>
       </tr>`).join("")}</tbody>
@@ -618,8 +720,8 @@ function render(results, errors, minRest) {
     out.push(`<div class="panel">
       <div class="grp-title">
         <span class="d">ø ${R.g.dia} mm</span>
-        <span class="muted small">Lagerlänge ${NF(m(R.g.cap))} m · ${R.bars.length} Stangen · Verschnitt ${NF(m(R.wasteAll), 2)} m (${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span>
-        ${R.bars.length === R.lower ? `<span class="tag ok">optimal — Materialschranke erreicht</span>` :
+        <span class="muted small">Lagerlänge ${NF(m(R.g.cap))} m · ${R.barsNew.length} neue Stangen${R.barsRest.length ? ` + ${R.barsRest.length} Reststangen` : ""} · Verschnitt ${NF(m(R.wasteAll), 2)} m (${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span>
+        ${R.barsNew.length === R.lower ? `<span class="tag ok">optimal — Materialschranke erreicht</span>` :
           `<span class="tag warn">rechn. Untergrenze ${R.lower} Stangen (durch die Längenkombination nicht immer erreichbar)</span>`}
       </div>`);
 
@@ -630,14 +732,28 @@ function render(results, errors, minRest) {
 
     if (!R.bars.length) { out.push(`</div>`); return; }
 
-    // Musterübersicht (kompakt, für Zuschnitt und Bestellung)
+    // Reststangen-Bilanz
+    if (R.remnants.length) {
+      const usedLens = R.barsRest.map(b => b.cap);
+      const free = R.remnants.slice().sort((a, b) => b - a);
+      usedLens.forEach(L => { const i = free.indexOf(L); if (i >= 0) free.splice(i, 1); });
+      out.push(`<div class="note" style="border-color:var(--ok); background:var(--ok-soft)">
+        <b>Reststangen:</b> ${R.remnants.length} vorhanden (${NF(m(R.remnantTotal), 2)} m) ·
+        ${R.barsRest.length ? `<b>${R.barsRest.length} angebrochen</b>, daraus ${NF(m(R.usedFromRest), 2)} m zu Stäben zugeschnitten
+          (spart ${NF(R.usedFromRest * R.kgm / 1000, 1)} kg Neumaterial), ${NF(m(R.restLeftover), 2)} m bleiben als neuer Rest`
+        : `keine eingesetzt — sie würden hier keine neue Stange einsparen und bleiben unangetastet am Lager`}${
+        free.length ? ` · unberührt: ${free.map(L => NF(m(L)) + " m").join(", ")}` : ""}
+      </div>`);
+    }
+
+    // Musterübersicht (kompakt, für Zuschnitt und Bestellung) — nur neue Stangen
     const pat = new Map();
-    R.bars.forEach(b => {
+    R.bars.filter(b => b.kind === "neu").forEach(b => {
       const k = b.pieces.map(p => p.len).join("+");
       if (!pat.has(k)) pat.set(k, { lens: b.pieces.map(p => p.len), n: 0, rest: b.rest, ids: [] });
       const e = pat.get(k); e.n++; e.ids.push(b.id);
     });
-    out.push(`<h3>Schnittmuster — Übersicht</h3>
+    if (pat.size) out.push(`<h3>Schnittmuster — Übersicht (neue Stangen)</h3>
       <div class="tbl-scroll"><table>
         <thead><tr><th class="num">Anzahl</th><th>Schnittmuster je ${NF(m(R.g.cap))} m Stange</th><th class="num">Rest</th><th class="num">Verschnitt gesamt</th></tr></thead>
         <tbody>${[...pat.values()].sort((a, b) => b.n - a.n).map(e => `<tr>
@@ -654,7 +770,7 @@ function render(results, errors, minRest) {
     if (group) {
       const gm = new Map();
       R.bars.forEach(b => {
-        const k = b.pieces.map(p => p.it.key + "@" + p.len).join("|");
+        const k = b.kind + "#" + b.cap + "#" + b.pieces.map(p => p.it.key + "@" + p.len).join("|");
         if (!gm.has(k)) { gm.set(k, Object.assign({}, b, { ids: [] })); }
         gm.get(k).ids.push(b.id);
       });
@@ -663,14 +779,15 @@ function render(results, errors, minRest) {
       R.bars.forEach(b => shown.push(Object.assign({}, b, { ids: [b.id] })));
     }
     out.push(`<h3 style="margin-top:18px">Schneideplan — Stange für Stange${group && shown.length < R.bars.length ? ` <span class="muted" style="text-transform:none; letter-spacing:0">(${R.bars.length} Stangen in ${shown.length} identischen Gruppen)</span>` : ""}</h3>`);
+    const maxCap = Math.max(R.g.cap, ...R.bars.map(b => b.cap));
     shown.forEach(b => {
       const segs = b.pieces.map(p => {
-        const share = p.len / R.g.cap;
+        const share = p.len / maxCap;
         const txt = share >= 0.14 ? `${esc(p.it.label)} · ${NF(m(p.len))}` : share >= 0.07 ? NF(m(p.len)) : "";
         return `<div class="seg" style="flex:${p.len} 0 0; background:${colorFor(ix.get(p.it.key))}" title="${esc(p.it.label)} · ${NF(m(p.len))} m">${txt}</div>`;
       }).join("");
       const restSeg = b.rest > 0
-        ? `<div class="seg rest" style="flex:${b.rest} 0 0" title="Rest ${NF(m(b.rest))} m">${b.rest / R.g.cap >= 0.09 ? "Rest " + NF(m(b.rest)) : ""}</div>`
+        ? `<div class="seg rest" style="flex:${b.rest} 0 0" title="Rest ${NF(m(b.rest))} m">${b.rest / maxCap >= 0.09 ? "Rest " + NF(m(b.rest)) : ""}</div>`
         : "";
       const counts = new Map();
       b.pieces.forEach(p => { const k = p.it.label + "|" + p.len; counts.set(k, (counts.get(k) || 0) + 1); });
@@ -679,10 +796,11 @@ function render(results, errors, minRest) {
       out.push(`<div class="bar">
         <div class="bar-head">
           <span>${ids.length > 1 ? `<b>${ids.length}× Stangen</b> <span class="muted">${rangeTxt}</span>` : `<b>${ids[0]}</b>`}
-            &nbsp;<span class="muted">${NF(m(R.g.cap))} m</span></span>
+            &nbsp;<span class="muted">${NF(m(b.cap))} m</span>
+            ${b.kind === "rest" ? `<span class="tag ok">Reststange</span>` : ""}</span>
           <span>genutzt ${NF(m(b.used))} m · <span style="color:${b.rest >= minRest ? "var(--warn)" : "var(--muted)"}">Rest ${NF(m(b.rest))} m${b.rest >= minRest && b.rest > 0 ? " ↺ verwertbar" : ""}${ids.length > 1 ? ` (gesamt ${NF(m(b.rest * ids.length), 2)} m)` : ""}</span></span>
         </div>
-        <div class="bar-vis">${segs}${restSeg}</div>
+        <div class="bar-vis" style="width:${(b.cap / maxCap * 100).toFixed(2)}%">${segs}${restSeg}</div>
         <div class="chips">${[...counts.entries()].map(([k, n]) => {
           const [lab, L] = k.split("|");
           return `<span class="chip">${n}× ${esc(lab)} &nbsp;${NF(m(+L))} m${ids.length > 1 ? ` <span class="muted">(je Stange)</span>` : ""}</span>`;
@@ -697,12 +815,23 @@ function render(results, errors, minRest) {
         <tbody>${R.cut.map(it => {
           const src = new Map();
           R.bars.forEach(b => b.pieces.forEach(p => { if (p.it.key === it.key) src.set(b.id, (src.get(b.id) || 0) + 1); }));
+          // Aufeinanderfolgende Stangen mit gleicher Stückzahl zu Bereichen zusammenfassen
+          const seq = [...src.entries()], runs = [];
+          const idxOf = new Map(); R.bars.forEach((b, i) => idxOf.set(b.id, i));
+          seq.forEach(([id, n]) => {
+            const last = runs[runs.length - 1];
+            if (last && last.n === n && idxOf.get(id) === idxOf.get(last.to) + 1) last.to = id;
+            else runs.push({ from: id, to: id, n });
+          });
+          const srcTxt = runs.map(r => r.from === r.to
+            ? `${r.from}<span class="muted">&nbsp;(${r.n}×)</span>`
+            : `<b>${r.from} – ${r.to}</b><span class="muted">&nbsp;(je ${r.n}×)</span>`).join(", ");
           return `<tr>
             <td><span class="chip" style="background:${colorFor(ix.get(it.key))}; color:#10131a; border:none">${esc(it.label)}</span></td>
             <td class="small muted">${esc(it.list)} · Pos. ${esc(it.pos)}</td>
             <td class="num">${NF(it.lenM)} m</td>
             <td class="num">${it.qty}</td>
-            <td class="small">${[...src.entries()].map(([id, n]) => `${id}<span class="muted">&nbsp;(${n}×)</span>`).join(", ")}</td>
+            <td class="small">${srcTxt}</td>
           </tr>`;
         }).join("")}</tbody>
       </table></div>`);
@@ -745,17 +874,22 @@ function renderWasteRanking(results) {
       Keine Position verursacht rechnerisch zusätzlichen Verschnitt — die Längen lassen sich untereinander gut kombinieren.
       Selbst schneiden ist hier durchwegs günstiger als Fixlängen zu bestellen.</div>`;
   } else {
-    const t = rows.filter(worth)[0];
-    const others = top.filter(r => r !== t).slice(0, 2);
+    const cands = rows.filter(worth);
+    const t = cands[0], others = cands.slice(1, 4);
+    const totKg = cands.reduce((s, r) => s + r.a.marginal * r.R.kgm / 1000, 0);
     rec = `<div class="note warn">
       <b>Empfehlung:</b> Position <b>${esc(t.a.it.label)}</b> (ø ${t.a.it.dia}, ${t.a.it.qty}× ${NF(t.a.it.lenM)} m,
       ${esc(t.a.it.list)}) ist der mit Abstand größte Verschnitttreiber: sie erhöht den Verschnitt um
       <b>${NF(m(t.a.marginal), 2)} m</b> = <b>${NF(t.a.marginal * t.R.kgm / 1000, 1)} kg</b>
       — das entspricht ${NF(t.a.wasteBars, 1)} Lagerstangen, die als reiner Abfall gekauft werden.
-      Grund: aus ${NF(m(t.R.g.cap))} m gehen nur ${t.a.perBar} Stück à ${NF(t.a.it.lenM)} m,
-      der verbleibende Rest lässt sich mit den übrigen Längen kaum füllen.
+      Grund: aus ${NF(m(t.R.g.cap))} m ${t.a.perBar === 1 ? "geht nur 1 Stück" : `gehen nur ${t.a.perBar} Stück`}
+      à ${NF(t.a.it.lenM)} m, der verbleibende Rest lässt sich mit den übrigen Längen kaum füllen.
       <b>Diese Position in Fixlänge ${NF(t.a.it.lenM)} m ab Werk bestellen</b> — dann entfällt der Anteil vollständig.
-      ${others.length ? `Danach folgen ${others.map(r => `<b>${esc(r.a.it.label)}</b> (+${NF(m(r.a.marginal), 2)} m)`).join(" und ")}; dort lohnt der Aufwand nicht, das bleibt Schnittware.` : ""}
+      ${others.length
+        ? `<br>Ebenfalls über der Schwelle einer ganzen Lagerstange und damit prüfenswert:
+           ${others.map(r => `<b>${esc(r.a.it.label)}</b> (${r.a.it.qty}× ${NF(r.a.it.lenM)} m, +${NF(m(r.a.marginal), 2)} m)`).join(", ")}.
+           Alle Kandidaten zusammen ergeben ${NF(totKg, 1)} kg vermeidbaren Verschnitt.`
+        : `<br>Alle übrigen Positionen lassen sich gut kombinieren und bleiben Schnittware.`}
       <br><span class="small">Zum Nachrechnen: Häkchen <b>fix</b> bei der Position setzen und neu berechnen.</span>
     </div>`;
   }

@@ -9,7 +9,8 @@ Im Browser öffnen (Doppelklick), es wird nichts installiert und nichts hochgela
 ## Was es macht
 
 * Verarbeitet **mehrere Stücklisten** gleichzeitig (z. B. Stoßüberdeckung, Obere Bewehrung, Unterzüge).
-* Rechnet **je Durchmesser getrennt**, Lagerlänge global oder je ø einstellbar (Standard 12,00 m).
+* Rechnet **je Durchmesser getrennt**, Lagerlänge global oder je ø einstellbar (Standard 7,00 m).
+* Berücksichtigt optional **vorhandene Reststangen** aus dem Lager (siehe unten).
 * **Schnittbreite wird ignoriert** (wie gefordert).
 * Gibt einen Schneideplan aus, bei dem **jedes geschnittene Stück seiner Position zugeordnet bleibt**:
   * Schnittmuster-Übersicht (was wird wie oft geschnitten),
@@ -24,6 +25,21 @@ Im Browser öffnen (Doppelklick), es wird nichts installiert und nichts hochgela
 Jede Stückliste bekommt einen Buchstaben (A, B, C …), jedes Stück das Etikett `A·4`
 (= Stückliste A, Position 4). Kommt eine Positionsnummer mehrfach mit verschiedenen Längen vor,
 wird sie automatisch unterschieden (`C·UZ6a`, `C·UZ6b`).
+
+## Reststangen
+
+Unter „Vorhandene Reststangen" lassen sich verwertbare Reste aus früheren Schnitten mit
+ø, Länge und Stückzahl erfassen. Sie werden als zusätzliche Stangen mit eigener Länge in die
+Optimierung aufgenommen — mit einer bewussten Einschränkung:
+
+> Eine Reststange wird **nur angebrochen, wenn dadurch eine neue Stange eingespart wird.**
+
+Sonst würde Lagermaterial verbraucht, ohne dass sich an der Bestellmenge etwas ändert — der
+Rest wandert nur von einem Stapel auf den anderen. Rangfolge der Optimierung: (1) möglichst
+wenige neue Stangen, (2) möglichst wenige angebrochene Reststangen, (3) möglichst wenig
+verbrauchtes Restmaterial. Die Ausgabe weist je Durchmesser aus, welche Reststangen
+angebrochen wurden, welche unberührt bleiben und was nach dem Schnitt wieder als Rest anfällt.
+Reststangen erscheinen im Plan als `R12-01` (maßstäblich kürzer gezeichnet), neue Stangen als `S12-001`.
 
 ## Verschnitt-Analyse
 
@@ -44,7 +60,9 @@ aus dem Schneideplan und der Plan wird neu optimiert.
 
 Musterbasierte Heuristik: für jede Stange wird per Branch & Bound das am besten füllende
 Schnittmuster für den Restbedarf gesucht und maximal oft wiederholt; zusätzlich laufen
-Best-Fit-Decreasing und randomisierte Mehrfachstarts. Bewertet wird primär die Stangenanzahl,
+Best-Fit-Decreasing und randomisierte Mehrfachstarts. Reststangen werden vorab in
+aufsteigender und absteigender Reihenfolge belegt, die bessere Variante gewinnt.
+Bewertet wird primär die Stangenanzahl,
 sekundär ein möglichst großes (und damit verwertbares) Reststück. Angezeigt wird auch die
 rechnerische Untergrenze (Gesamtlänge ÷ Lagerlänge) als Vergleichsmaßstab — diese ist je nach
 Längenkombination nicht immer erreichbar.
