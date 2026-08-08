@@ -94,6 +94,18 @@
   .chips{display:flex; flex-wrap:wrap; gap:4px; margin-top:4px}
   .chip{font-size:11px; padding:1px 6px; border-radius:20px; border:1px solid var(--line); background:var(--panel); font-family:var(--mono)}
 
+  .ticks{display:flex; flex-wrap:wrap; gap:4px; align-items:center; margin-top:5px}
+  .tick{display:inline-flex; gap:4px; align-items:center; font-family:var(--mono); font-size:11px;
+        border:1px solid var(--line); border-radius:4px; padding:1px 6px; cursor:pointer; background:var(--panel)}
+  .tick:hover{border-color:var(--accent)}
+  .tick input{margin:0; width:13px; height:13px; accent-color:var(--accent)}
+  .tick.on{background:var(--ok-soft); border-color:var(--ok); color:var(--ok); text-decoration:line-through}
+  .tickcount{font-size:11px; font-weight:600; color:var(--muted); margin-right:2px; white-space:nowrap}
+  .bar.alldone .bar-vis{opacity:.4}
+  .bar.alldone .bar-head b{text-decoration:line-through}
+  .prog{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
+  .prog b{color:var(--ok)}
+
   .tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:20px; font-weight:600}
   .tag.bad{background:var(--bad-soft); color:var(--bad)}
   .tag.warn{background:var(--warn-soft); color:var(--warn)}
@@ -152,6 +164,7 @@
       </label>
       <button class="primary" id="btnCalc">Schneideplan berechnen</button>
       <button id="btnPrint">Drucken / PDF</button>
+      <button id="btnResetDone">Haken zurücksetzen</button>
     </div>
     <div id="diaSettings" style="margin-top:12px"></div>
   </div>
@@ -205,7 +218,7 @@ const m = x => x / 1000;
 /* ---------- Zustand ---------- */
 const DEMO = {
   stockDefault: 7, minRest: 1.0,
-  dia: {}, rests: [],
+  dia: {}, rests: [], done: {},
   lists: [
     {
       name: "Stoßüberdeckung / Zulageeisen auf Platten",
@@ -252,6 +265,29 @@ const DEMO = {
 
 let state = JSON.parse(JSON.stringify(DEMO));
 const $ = id => document.getElementById(id);
+
+/* Zwischenspeicher im Browser, damit gesetzte Haken einen Reload überleben.
+   Schlägt in manchen Browsern bei lokalen Dateien fehl — dann still ohne Speicher weiterarbeiten. */
+const LS_KEY = "schneideplan.state.v1";
+const DEFAULTS = { stockDefault: 7, minRest: 1.0, dia: {}, rests: [], done: {}, lists: [] };
+let saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) { /* egal */ } }, 250);
+}
+function loadStored() {
+  try {
+    const s = localStorage.getItem(LS_KEY);
+    if (!s) return false;
+    const d = JSON.parse(s);
+    if (!d || !Array.isArray(d.lists) || !d.lists.length) return false;
+    state = Object.assign({}, DEFAULTS, d);
+    if (!state.done) state.done = {};
+    return true;
+  } catch (e) { return false; }
+}
+document.addEventListener("input", save);
+document.addEventListener("change", save);
 
 /* ---------- Rendering Eingabe ---------- */
 function listShort(i) { return String.fromCharCode(65 + i); }
@@ -390,8 +426,15 @@ $("diaSettings").addEventListener("input", e => {
 $("stockDefault").addEventListener("input", e => { state.stockDefault = parseFloat(e.target.value.replace(",", ".")) || 12; renderDiaSettings(); });
 $("minRest").addEventListener("input", e => { state.minRest = parseFloat(e.target.value.replace(",", ".")) || 0; });
 $("btnAddList").onclick = () => { state.lists.push({ name: "Neue Stückliste", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }); renderLists(); };
-$("btnDemo").onclick = () => { state = JSON.parse(JSON.stringify(DEMO)); $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest; renderLists(); $("out").innerHTML = ""; };
-$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, rests: [], lists: [{ name: "Stückliste 1", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; renderLists(); $("out").innerHTML = ""; };
+$("btnDemo").onclick = () => { state = JSON.parse(JSON.stringify(DEMO)); $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest; renderLists(); $("out").innerHTML = ""; save(); };
+$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, rests: [], done: {}, lists: [{ name: "Stückliste 1", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; renderLists(); $("out").innerHTML = ""; save(); };
+$("btnResetDone").onclick = () => {
+  const n = Object.keys(state.done || {}).length;
+  if (n && !confirm(`${n} gesetzte Haken zurücksetzen?`)) return;
+  state.done = {};
+  document.querySelectorAll("#out [data-done]").forEach(cb => { cb.checked = false; });
+  refreshTicks(); save();
+};
 $("btnPrint").onclick = () => window.print();
 $("btnExport").onclick = () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
@@ -407,9 +450,12 @@ $("fileImport").addEventListener("change", e => {
     try {
       const d = JSON.parse(rd.result);
       if (!d.lists) throw 0;
-      state = Object.assign({ stockDefault: 7, minRest: 1, dia: {}, rests: [] }, d);
+      state = Object.assign({}, DEFAULTS, d);
+      if (!state.done) state.done = {};
       $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest;
-      renderLists(); $("out").innerHTML = "";
+      renderLists(); $("out").innerHTML = ""; save();
+      const nd = Object.keys(state.done).length;
+      if (nd) alert(`Daten geladen — ${nd} gesetzte Haken übernommen.\nNach dem Neuberechnen erscheinen sie wieder im Schneideplan.`);
     } catch (_) { alert("Datei konnte nicht gelesen werden."); }
   };
   rd.readAsText(f);
@@ -673,6 +719,53 @@ function calc() {
 /* ---------- Ausgabe ---------- */
 function colorFor(ix) { return `hsl(${(ix * 47 + 14) % 360} 62% 68%)`; }
 
+/* Schlüssel für den Erledigt-Haken. Enthält bewusst den Inhalt der Stange:
+   ändert sich der Schnitt nach einer Neuberechnung, verfällt der Haken,
+   statt auf einer inhaltlich anderen Stange stehen zu bleiben. */
+function doneKey(b) {
+  return `${b.id}|${b.cap}|${b.pieces.map(p => p.it.label + ":" + p.len).join(",")}`;
+}
+
+function refreshTicks() {
+  document.querySelectorAll("#out .bar").forEach(bar => {
+    const cbs = [...bar.querySelectorAll("[data-done]")];
+    const done = cbs.filter(c => c.checked).length;
+    cbs.forEach(c => c.closest(".tick").classList.toggle("on", c.checked));
+    bar.classList.toggle("alldone", cbs.length > 0 && done === cbs.length);
+    const tc = bar.querySelector(".tickcount");
+    if (tc) tc.textContent = cbs.length > 1 ? `${done} / ${cbs.length} geschnitten` : "";
+  });
+  document.querySelectorAll("#out [data-prog]").forEach(el => {
+    const cbs = [...(el.closest(".panel") || document).querySelectorAll("[data-done]")];
+    const done = cbs.filter(c => c.checked).length;
+    el.innerHTML = cbs.length ? `<b>${done}</b> / ${cbs.length} Stangen geschnitten` : "";
+  });
+  const box = $("progAll");
+  if (box) {
+    const cbs = [...document.querySelectorAll("#out [data-done]")];
+    const done = cbs.filter(c => c.checked).length;
+    box.innerHTML = `<div class="k">Fortschritt Zuschnitt</div>
+      <div class="v"${done && done === cbs.length ? ` style="color:var(--ok)"` : ""}>${done} / ${cbs.length}</div>
+      <div class="n">Stangen abgehakt · ${NF(cbs.length ? done / cbs.length * 100 : 0, 0)} %</div>`;
+  }
+}
+
+$("out").addEventListener("change", e => {
+  const cb = e.target.closest("[data-done]"); if (!cb) return;
+  if (cb.checked) state.done[cb.dataset.done] = true; else delete state.done[cb.dataset.done];
+  refreshTicks(); save();
+});
+$("out").addEventListener("click", e => {
+  const btn = e.target.closest("[data-alldone]"); if (!btn) return;
+  const cbs = [...btn.closest(".bar").querySelectorAll("[data-done]")];
+  const target = !cbs.every(c => c.checked);
+  cbs.forEach(c => {
+    c.checked = target;
+    if (target) state.done[c.dataset.done] = true; else delete state.done[c.dataset.done];
+  });
+  refreshTicks(); save();
+});
+
 function render(results, errors, minRest) {
   const out = [];
 
@@ -694,6 +787,7 @@ function render(results, errors, minRest) {
       <div class="kpi"><div class="k">Verschnitt</div><div class="v">${NF(gWaste, 1)} kg</div><div class="n">${NF(gStock ? gWaste / gStock * 100 : 0, 1)} % vom Neumaterial</div></div>
       ${gRestBars ? `<div class="kpi" style="border-color:var(--ok)"><div class="k">Aus Reststangen gedeckt</div><div class="v" style="color:var(--ok)">${NF(gRestKg, 1)} kg</div><div class="n">${gRestBars} Reststange${gRestBars > 1 ? "n" : ""} angebrochen</div></div>` : ""}
       ${gFixKg ? `<div class="kpi"><div class="k">Fixlängen / Ring</div><div class="v">${NF(gFixKg, 1)} kg</div><div class="n">ohne Schneideverschnitt</div></div>` : ""}
+      <div class="kpi" id="progAll"></div>
     </div>
   </div>`);
 
@@ -724,6 +818,7 @@ function render(results, errors, minRest) {
         <span class="muted small">Lagerlänge ${NF(m(R.g.cap))} m · ${R.barsNew.length} neue Stangen${R.barsRest.length ? ` + ${R.barsRest.length} Reststangen` : ""} · Verschnitt ${NF(m(R.wasteAll), 2)} m (${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span>
         ${R.barsNew.length === R.lower ? `<span class="tag ok">optimal — Materialschranke erreicht</span>` :
           `<span class="tag warn">rechn. Untergrenze ${R.lower} Stangen (durch die Längenkombination nicht immer erreichbar)</span>`}
+        <span class="prog" data-prog style="margin-left:auto"></span>
       </div>`);
 
     if (R.fixed.length) {
@@ -772,12 +867,12 @@ function render(results, errors, minRest) {
       const gm = new Map();
       R.bars.forEach(b => {
         const k = b.kind + "#" + b.cap + "#" + b.pieces.map(p => p.it.key + "@" + p.len).join("|");
-        if (!gm.has(k)) { gm.set(k, Object.assign({}, b, { ids: [] })); }
-        gm.get(k).ids.push(b.id);
+        if (!gm.has(k)) { gm.set(k, Object.assign({}, b, { ids: [], members: [] })); }
+        const e = gm.get(k); e.ids.push(b.id); e.members.push({ id: b.id, key: doneKey(b) });
       });
       shown.push(...gm.values());
     } else {
-      R.bars.forEach(b => shown.push(Object.assign({}, b, { ids: [b.id] })));
+      R.bars.forEach(b => shown.push(Object.assign({}, b, { ids: [b.id], members: [{ id: b.id, key: doneKey(b) }] })));
     }
     out.push(`<h3 style="margin-top:18px">Schneideplan — Stange für Stange${group && shown.length < R.bars.length ? ` <span class="muted" style="text-transform:none; letter-spacing:0">(${R.bars.length} Stangen in ${shown.length} identischen Gruppen)</span>` : ""}</h3>`);
     const maxCap = Math.max(R.g.cap, ...R.bars.map(b => b.cap));
@@ -806,6 +901,14 @@ function render(results, errors, minRest) {
           const [lab, L] = k.split("|");
           return `<span class="chip">${n}× ${esc(lab)} &nbsp;${NF(m(+L))} m${ids.length > 1 ? ` <span class="muted">(je Stange)</span>` : ""}</span>`;
         }).join("")}</div>
+        <div class="ticks">
+          <span class="tickcount"></span>
+          ${b.members.length > 1 ? `<button class="mini no-print" data-alldone="1">alle</button>` : ""}
+          ${b.members.map(mb => `<label class="tick${state.done[mb.key] ? " on" : ""}">
+            <input type="checkbox" data-done="${esc(mb.key)}"${state.done[mb.key] ? " checked" : ""}>
+            <span>${b.members.length > 1 ? esc(mb.id.split("-")[1]) : "erledigt"}</span>
+          </label>`).join("")}
+        </div>
       </div>`);
     });
 
@@ -849,6 +952,7 @@ function render(results, errors, minRest) {
   // Verschnittverursacher
   out.push(renderWasteRanking(results));
   $("out").innerHTML = out.join("");
+  refreshTicks();
   $("out").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -935,5 +1039,16 @@ function renderWasteRanking(results) {
 
 $("btnCalc").onclick = () => { $("btnCalc").textContent = "rechnet …"; setTimeout(() => { try { calc(); } finally { $("btnCalc").textContent = "Schneideplan berechnen"; } }, 20); };
 
+if (loadStored()) {
+  $("stockDefault").value = state.stockDefault;
+  $("minRest").value = state.minRest;
+  const nd = Object.keys(state.done).length;
+  const note = document.createElement("div");
+  note.className = "note no-print";
+  note.innerHTML = `Eingaben aus dem Browser-Speicher dieses Geräts wiederhergestellt${nd ? `, inklusive <b>${nd} gesetzter Haken</b>` : ""}.
+    Über <b>Beispieldaten laden</b> oder <b>Alles leeren</b> neu anfangen.`;
+  document.querySelector(".wrap").insertBefore(note, document.querySelector(".panel"));
+}
+if (!state.done) state.done = {};
 renderLists();
 </script>

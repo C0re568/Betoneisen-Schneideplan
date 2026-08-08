@@ -16,6 +16,7 @@ Im Browser öffnen (Doppelklick), es wird nichts installiert und nichts hochgela
   * Schnittmuster-Übersicht (was wird wie oft geschnitten),
   * Plan Stange für Stange mit Positions-Kennzeichnung je Stück (identische Stangen zusammengefasst),
   * Rückwärts-Zuordnung „Position → aus welchen Stangen geschnitten".
+* **Erledigt-Haken je Stange** zum Abhaken während des Schneidens, mit Fortschrittsanzeige.
 * Listet **verwertbare Reststücke** ab einer einstellbaren Mindestlänge.
 * **Zusatzauswertung:** welche Position den meisten Verschnitt verursacht und daher besser
   in Fixlängen ab Werk bestellt wird.
@@ -40,6 +41,28 @@ wenige neue Stangen, (2) möglichst wenige angebrochene Reststangen, (3) möglic
 verbrauchtes Restmaterial. Die Ausgabe weist je Durchmesser aus, welche Reststangen
 angebrochen wurden, welche unberührt bleiben und was nach dem Schnitt wieder als Rest anfällt.
 Reststangen erscheinen im Plan als `R12-01` (maßstäblich kürzer gezeichnet), neue Stangen als `S12-001`.
+
+## Erledigt-Haken
+
+Jede Stange im Schneideplan hat ein Kästchen zum Abhaken. Bei zusammengefassten Stangen
+erscheint ein Kästchen je Stangennummer plus ein Schalter **alle**; abgehakte Stangen werden
+durchgestrichen und ausgegraut. Der Fortschritt wird je Durchmesser und gesamt angezeigt
+(„34 / 176 Stangen geschnitten"). **Haken zurücksetzen** löscht alle Haken nach Rückfrage.
+
+Gespeichert wird an zwei Stellen:
+
+* **Export/Import JSON** — die Haken sind im Feld `done` enthalten und werden beim Import
+  wieder übernommen (mit Meldung, wie viele es waren). Das ist der zuverlässige Weg, um den
+  Stand zu sichern oder an ein anderes Gerät zu übergeben.
+* **Browser-Speicher** — Eingaben und Haken werden automatisch zwischengespeichert und beim
+  nächsten Öffnen auf demselben Gerät wiederhergestellt (mit Hinweis oben auf der Seite).
+  Manche Browser sperren das bei lokalen Dateien; dann greift lautlos nur der Export.
+
+Ein Haken hängt am Stangennamen **und am Inhalt der Stange**. Ändert sich nach einer
+Neuberechnung das Schnittmuster einer Stange, verfällt ihr Haken, statt auf einem inhaltlich
+anderen Schnitt stehen zu bleiben — im Zweifel lieber „noch offen" als fälschlich „erledigt".
+Unveränderte Stangen behalten ihren Haken. Im Test blieben nach einer Mengenänderung
+37 von 66 Haken erhalten, die 29 geänderten Stangen wurden zurückgesetzt.
 
 ## Verschnitt-Analyse
 
