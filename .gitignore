@@ -1,0 +1,4 @@
+# Exportierte Stücklisten und Projektdaten bleiben lokal
+schneideplan-daten.json
+projekt-*.json
+*.local.json

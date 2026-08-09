@@ -218,46 +218,25 @@ const m = x => x / 1000;
 /* ---------- Zustand ---------- */
 const DEMO = {
   stockDefault: 7, minRest: 1.0,
-  dia: {}, rests: [], done: {},
+  dia: {}, done: {},
+  // Minimalbeispiel zum Überschreiben mit den eigenen Zahlen.
+  // Zeigt bewusst alle Bausteine: zwei Stücklisten, zwei Durchmesser,
+  // eine vorhandene Reststange und eine Position mit hohem Verschnitt.
+  rests: [{ dia: 12, len: 5.00, qty: 1, note: "Lager" }],
   lists: [
     {
-      name: "Stoßüberdeckung / Zulageeisen auf Platten",
+      name: "Platte",
       rows: [
-        { pos: "1", qty: 9, dia: 8, len: 4.80, fix: false },
-        { pos: "2", qty: 4, dia: 12, len: 4.80, fix: false },
-        { pos: "3", qty: 39, dia: 8, len: 3.50, fix: false },
-        { pos: "4", qty: 92, dia: 8, len: 5.00, fix: false },
-        { pos: "5", qty: 4, dia: 8, len: 4.00, fix: false },
-        { pos: "6", qty: 24, dia: 8, len: 3.00, fix: false },
-        { pos: "7", qty: 24, dia: 8, len: 4.25, fix: false },
-        { pos: "8", qty: 3, dia: 12, len: 3.00, fix: false },
-        { pos: "9", qty: 10, dia: 12, len: 2.00, fix: false },
-        { pos: "10", qty: 4, dia: 12, len: 3.50, fix: false }
+        { pos: "1", qty: 12, dia: 12, len: 4.00, fix: false },
+        { pos: "2", qty: 12, dia: 12, len: 3.00, fix: false },
+        { pos: "3", qty: 20, dia: 8, len: 2.50, fix: false }
       ]
     },
     {
-      name: "Obere Bewehrung",
+      name: "Unterzug",
       rows: [
-        { pos: "11", qty: 53, dia: 12, len: 2.50, fix: false },
-        { pos: "12", qty: 58, dia: 8, len: 2.50, fix: false },
-        { pos: "13", qty: 37, dia: 12, len: 1.40, fix: false },
-        { pos: "14", qty: 10, dia: 12, len: 3.00, fix: false },
-        { pos: "15", qty: 6, dia: 10, len: 3.00, fix: false },
-        { pos: "16", qty: 3, dia: 12, len: 4.50, fix: false },
-        { pos: "17", qty: 6, dia: 12, len: 3.50, fix: false },
-        { pos: "18", qty: 28, dia: 12, len: 2.00, fix: false }
-      ]
-    },
-    {
-      name: "Unterzüge",
-      rows: [
-        { pos: "UZ1", qty: 5, dia: 12, len: 3.65, fix: false },
-        { pos: "UZ2", qty: 4, dia: 12, len: 2.45, fix: false },
-        { pos: "UZ3", qty: 4, dia: 12, len: 2.15, fix: false },
-        { pos: "UZ4", qty: 4, dia: 12, len: 2.45, fix: false },
-        { pos: "UZ5", qty: 4, dia: 12, len: 2.45, fix: false },
-        { pos: "UZ6", qty: 2, dia: 12, len: 2.62, fix: false },
-        { pos: "UZ6", qty: 2, dia: 12, len: 2.50, fix: false }
+        { pos: "UZ1", qty: 4, dia: 12, len: 3.50, fix: false },
+        { pos: "UZ2", qty: 6, dia: 12, len: 2.45, fix: false }
       ]
     }
   ]

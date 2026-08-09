@@ -92,8 +92,13 @@ Längenkombination nicht immer erreichbar.
 
 ## Bedienung
 
-* **Beispieldaten laden** — die Stücklisten aus den Plänen (Pos. 1–18) plus Unterzüge UZ1–UZ6.
-* **Export/Import JSON** — Daten sichern und wieder einlesen.
+* **Beispieldaten laden** — ein bewusst kleines Beispiel zum Überschreiben: zwei Stücklisten
+  („Platte" mit 3 Positionen, „Unterzug" mit 2), zwei Durchmesser und eine vorhandene
+  Reststange. Es zeigt alle Bausteine an einem Fall, den man auf einen Blick nachvollzieht —
+  inklusive einer Position, die als Fixlängen-Kandidat auffällt. Eigene Zahlen einfach
+  darüberschreiben, Zeilen und Listen nach Bedarf ergänzen.
+* **Export/Import JSON** — Daten sichern und wieder einlesen. Exportierte Stücklisten sind in
+  `.gitignore` ausgenommen und landen nicht versehentlich im Repository.
 * **Drucken / PDF** — druckoptimierte Ausgabe für die Baustelle.
 * **aus Ring** — je Durchmesser aktivierbar: Material vom Ring (gerichteter Betonstahl) wird
   auf Länge abgelängt, es entsteht kein Schneideverschnitt.
