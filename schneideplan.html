@@ -107,6 +107,14 @@
   .prog{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
   .prog b{color:var(--ok)}
 
+  /* Fortschritt je Position in der Stückliste (aus den Haken im Plan zurückgerechnet) */
+  .rowtable td.dcell{font-size:12px; line-height:1.3; color:var(--muted); font-variant-numeric:tabular-nums}
+  .rowtable td.dcell b{font-size:13px; color:var(--ink)}
+  .rowtable td.dcell[data-donestate="all"], .rowtable td.dcell[data-donestate="all"] b{color:var(--ok)}
+  .rowtable td.dcell[data-donestate="stale"]{color:var(--warn)}
+  .rowtable tr.posdone input{opacity:.7}
+  .rowtable tr.posdone input[type=text]{text-decoration:line-through}
+
   .tag{display:inline-block; font-size:11px; padding:1px 7px; border-radius:20px; font-weight:600}
   .tag.bad{background:var(--bad-soft); color:var(--bad)}
   .tag.warn{background:var(--warn-soft); color:var(--warn)}
@@ -264,7 +272,7 @@ const I18N = {
     "lists.clear": "Alles leeren",
     "lists.export": "Export JSON",
     "lists.import": "Import JSON",
-    "lists.foot": "Spalte <b>fix</b> = Position wird in Fixlänge ab Werk bestellt und nicht selbst geschnitten (fällt aus dem Schneideplan heraus, Verschnitt = 0). Spalte <b>Ring</b> in den Durchmesser-Einstellungen = Material kommt vom Ring (gerichteter Betonstahl), dann entsteht beim Ablängen ebenfalls kein Verschnitt.",
+    "lists.foot": "Spalte <b>fix</b> = Position wird in Fixlänge ab Werk bestellt und nicht selbst geschnitten (fällt aus dem Schneideplan heraus, Verschnitt = 0). Spalte <b>Ring</b> in den Durchmesser-Einstellungen = Material kommt vom Ring (gerichteter Betonstahl), dann entsteht beim Ablängen ebenfalls kein Verschnitt. Spalte <b>erledigt</b> = wie viele Stück dieser Position durch die im Schneideplan abgehakten Stangen schon geschnitten sind; der Rest steht als „offen“ daneben.",
     "list.namePh": "Bezeichnung der Stückliste",
     "list.addRow": "+ Zeile",
     "list.del": "Liste löschen",
@@ -276,7 +284,20 @@ const I18N = {
     "th.dia": "ø [mm]",
     "th.len": "Länge [m]",
     "th.fix": "fix",
+    "th.done": "erledigt",
+    "th.doneHint": "Wie viele Stück dieser Position im Schneideplan unten schon abgehakt sind.",
     "th.note": "Bemerkung",
+
+    "pos.doneNoPlan": "–",
+    "pos.doneNoPlanHint": "Noch kein Schneideplan gerechnet — „Schneideplan berechnen“ drücken.",
+    "pos.doneStale": "neu rechnen",
+    "pos.doneStaleHint": "Diese Zeile wurde nach der letzten Berechnung geändert — der Fortschritt gilt noch für die alten Werte.",
+    "pos.doneNoCut": "nicht im Plan",
+    "pos.doneNoCutHint": "Fixlänge, Ring oder länger als die Lagerstange — diese Position wird nicht geschnitten.",
+    "pos.doneCount": v => `<b>${v.done}</b> / ${v.n}`,
+    "pos.doneOpen": v => `${v.open} offen`,
+    "pos.doneReady": "fertig",
+    "pos.doneHint": v => `${v.done} von ${v.n} Stück geschnitten, ${v.open} noch offen.`,
 
     "demo.list1": "Platte",
     "demo.list2": "Unterzug",
@@ -410,7 +431,7 @@ const I18N = {
     "lists.clear": "Clear all",
     "lists.export": "Export JSON",
     "lists.import": "Import JSON",
-    "lists.foot": "Column <b>fixed</b> = the position is ordered as a fixed length from the mill and not cut in-house (it drops out of the cutting plan, waste = 0). Column <b>Coil</b> in the diameter settings = the material comes from a coil (straightened rebar), so cutting to length produces no waste either.",
+    "lists.foot": "Column <b>fixed</b> = the position is ordered as a fixed length from the mill and not cut in-house (it drops out of the cutting plan, waste = 0). Column <b>Coil</b> in the diameter settings = the material comes from a coil (straightened rebar), so cutting to length produces no waste either. Column <b>done</b> = how many pieces of this position are already cut according to the bars ticked off in the cutting plan; the remainder is shown next to it as “open”.",
     "list.namePh": "Name of the bar list",
     "list.addRow": "+ Row",
     "list.del": "Delete list",
@@ -422,7 +443,20 @@ const I18N = {
     "th.dia": "ø [mm]",
     "th.len": "Length [m]",
     "th.fix": "fixed",
+    "th.done": "done",
+    "th.doneHint": "How many pieces of this position are already ticked off in the cutting plan below.",
     "th.note": "Note",
+
+    "pos.doneNoPlan": "–",
+    "pos.doneNoPlanHint": "No cutting plan calculated yet — press “Calculate cutting plan”.",
+    "pos.doneStale": "recalculate",
+    "pos.doneStaleHint": "This row changed after the last calculation — the progress still refers to the old values.",
+    "pos.doneNoCut": "not in the plan",
+    "pos.doneNoCutHint": "Fixed length, coil or longer than the stock bar — this position is not cut.",
+    "pos.doneCount": v => `<b>${v.done}</b> / ${v.n}`,
+    "pos.doneOpen": v => `${v.open} open`,
+    "pos.doneReady": "complete",
+    "pos.doneHint": v => `${v.done} of ${v.n} pieces cut, ${v.open} still open.`,
 
     "demo.list1": "Slab",
     "demo.list2": "Beam",
@@ -609,9 +643,11 @@ function renderLists() {
       <div class="tbl-scroll">
       <table class="rowtable">
         <thead><tr>
-          <th style="width:20%">${esc(t("th.pos"))}</th><th style="width:16%" class="num">${esc(t("th.qty"))}</th>
-          <th style="width:16%" class="num">${esc(t("th.dia"))}</th><th style="width:20%" class="num">${esc(t("th.len"))}</th>
-          <th style="width:14%">${esc(t("th.fix"))}</th><th style="width:8%"></th>
+          <th style="width:18%">${esc(t("th.pos"))}</th><th style="width:13%" class="num">${esc(t("th.qty"))}</th>
+          <th style="width:13%" class="num">${esc(t("th.dia"))}</th><th style="width:17%" class="num">${esc(t("th.len"))}</th>
+          <th style="width:11%">${esc(t("th.fix"))}</th>
+          <th style="width:20%" class="num" title="${esc(t("th.doneHint"))}">${esc(t("th.done"))}</th>
+          <th style="width:8%"></th>
         </tr></thead>
         <tbody>
         ${L.rows.map((r, ri) => `
@@ -621,6 +657,7 @@ function renderLists() {
             <td><input type="number" value="${r.dia}" min="1" step="1" data-f="dia"></td>
             <td><input type="number" value="${r.len}" min="0" step="0.01" data-f="len"></td>
             <td style="text-align:center"><input type="checkbox" ${r.fix ? "checked" : ""} data-f="fix"></td>
+            <td class="num dcell" data-doneof="${li}:${ri}"></td>
             <td style="text-align:right"><button class="mini" data-act="delrow">×</button></td>
           </tr>`).join("")}
         </tbody>
@@ -629,6 +666,7 @@ function renderLists() {
     </div>`).join("");
   renderRests();
   renderDiaSettings();
+  renderListProgress();
 }
 
 function renderRests() {
@@ -705,10 +743,10 @@ $("lists").addEventListener("input", e => {
   const tr = e.target.closest("[data-ri]"); if (!tr) return;
   const ri = +tr.dataset.ri, f = e.target.dataset.f; if (!f) return;
   const row = state.lists[li].rows[ri];
-  if (f === "fix") row.fix = e.target.checked;
+  if (f === "fix") { row.fix = e.target.checked; renderListProgress(); }
   else if (f === "pos") row.pos = e.target.value;
   else row[f] = parseFloat(e.target.value.replace(",", ".")) || 0;
-  if (f === "dia" || f === "qty" || f === "len") renderDiaSettings();
+  if (f === "dia" || f === "qty" || f === "len") { renderDiaSettings(); renderListProgress(); }
 });
 
 $("lists").addEventListener("click", e => {
@@ -1092,6 +1130,57 @@ function refreshTicks() {
       <div class="v"${s.done && s.done === s.n ? ` style="color:var(--ok)"` : ""}>${s.done} / ${s.n}</div>
       <div class="n">${esc(t("prog.n", { p: NF(s.n ? s.done / s.n * 100 : 0, 0) }))}</div>`;
   }
+  renderListProgress();
+}
+
+/* Fortschritt je Position: aus den abgehakten Stangen des letzten Plans zurückgerechnet.
+   Die Haken sitzen an den Stangen, jedes Stück einer abgehakten Stange gehört aber weiterhin
+   zu seiner Position — so lässt sich in der Stückliste ablesen, was davon schon geschnitten
+   ist und was noch offen ist. */
+function positionProgress() {
+  const map = new Map();
+  if (!lastResult || !lastResult.results) return map;
+  lastResult.results.forEach(R => {
+    R.cut.forEach(it => map.set(it.key, { it, n: it.qty, done: 0, inPlan: true }));
+    R.fixed.forEach(it => map.set(it.key, { it, n: it.qty, done: 0, inPlan: false }));
+    R.bars.forEach(b => {
+      if (!state.done[doneKey(b)]) return;
+      b.pieces.forEach(p => { const e = map.get(p.it.key); if (e) e.done++; });
+    });
+  });
+  // Zeilen, die nach der Berechnung geändert wurden, tragen einen anderen Bedarf als der Plan.
+  map.forEach((e, key) => {
+    const [li, ri] = key.split(":").map(Number);
+    const L = state.lists[li], r = L && L.rows[ri];
+    e.stale = !r || Math.round(+r.qty || 0) !== e.it.qty || (+r.dia || 0) !== e.it.dia
+      || (+r.len || 0) !== e.it.lenM || !!r.fix !== e.it.fix;
+  });
+  return map;
+}
+
+function renderListProgress() {
+  const cells = document.querySelectorAll("#lists [data-doneof]");
+  if (!cells.length) return;
+  const map = positionProgress();
+  cells.forEach(td => {
+    const e = map.get(td.dataset.doneof);
+    let st = "none", html = `<span class="muted">${esc(t("pos.doneNoPlan"))}</span>`, hint = t("pos.doneNoPlanHint");
+    if (e && e.stale) {
+      st = "stale"; html = esc(t("pos.doneStale")); hint = t("pos.doneStaleHint");
+    } else if (e && !e.inPlan) {
+      st = "nocut"; html = `<span class="muted">${esc(t("pos.doneNoCut"))}</span>`; hint = t("pos.doneNoCutHint");
+    } else if (e) {
+      const open = e.n - e.done;
+      st = open === 0 ? "all" : "open";
+      html = `${t("pos.doneCount", { done: e.done, n: e.n })}
+        <span class="small">· ${esc(open === 0 ? t("pos.doneReady") : t("pos.doneOpen", { open }))}</span>`;
+      hint = t("pos.doneHint", { done: e.done, n: e.n, open });
+    }
+    td.dataset.donestate = st;
+    td.title = hint;
+    td.innerHTML = html;
+    td.closest("tr").classList.toggle("posdone", st === "all");
+  });
 }
 
 $("out").addEventListener("change", e => {

@@ -42,7 +42,8 @@ in der jeweils aktiven Sprache.
   * Plan Stange für Stange mit Positions-Kennzeichnung je Stück (identische Stangen zusammengefasst),
   * Rückwärts-Zuordnung „Position → aus welchen Stangen geschnitten".
 * **Erledigt-Haken je Plan-Eintrag** zum Abhaken während des Schneidens, mit Fortschrittsanzeige
-  in Stangen.
+  in Stangen und **je Position in der Stückliste** (Spalte „erledigt": wie viele Stück schon
+  geschnitten sind, wie viele noch offen).
 * Listet **verwertbare Reststücke** ab einer einstellbaren Mindestlänge.
 * **Zusatzauswertung:** welche Position den meisten Verschnitt verursacht und daher besser
   in Fixlängen ab Werk bestellt wird.
@@ -76,6 +77,23 @@ gemeinsam ab („gilt für alle 12 Stangen dieses Musters"); abgehakte Einträge
 durchgestrichen und ausgegraut. Gezählt wird trotzdem in Stangen, nicht in Einträgen:
 der Fortschritt je Durchmesser und gesamt zeigt „34 / 176 Stangen geschnitten".
 **Haken zurücksetzen** löscht alle Haken nach Rückfrage.
+
+### Fortschritt in der Stückliste
+
+Abgehakt wird an der Stange, wissen will man es aber je Position. Die Stückliste hat dafür die
+Spalte **erledigt**: sie rechnet aus den abgehakten Stangen zurück, wie viele Stück der Position
+dadurch geschnitten sind — `8 / 12 · 4 offen`, bei vollständig geschnittenen Positionen
+`12 / 12 · fertig` in Grün und die Zeile durchgestrichen. Die Spalte aktualisiert sich beim
+Setzen eines Hakens sofort, ohne Neuberechnung.
+
+Drei Sonderfälle:
+
+* **„–"** — es ist noch kein Schneideplan gerechnet.
+* **„nicht im Plan"** — die Position ist Fixlänge, kommt vom Ring oder ist länger als die
+  Lagerstange; sie wird nicht geschnitten und kann daher nicht abgehakt werden.
+* **„neu rechnen"** — Stückzahl, ø, Länge oder das Häkchen *fix* wurden nach der letzten
+  Berechnung geändert. Der Fortschritt gälte dann für andere Werte als die eingetippten und wird
+  bewusst nicht mehr angezeigt.
 
 Gespeichert wird an zwei Stellen:
 
@@ -186,7 +204,8 @@ exactly as they are — only the sample data is loaded in whichever language is 
   * cutting-pattern overview (what is cut, and how often),
   * bar-by-bar plan with a position label on each piece (identical bars grouped),
   * reverse lookup "position → which bars was it cut from".
-* **A check mark per bar** to tick off while cutting, with a progress display.
+* **A check mark per bar** to tick off while cutting, with a progress display in bars and
+  **per position in the bar list** (column "done": how many pieces are cut, how many are still open).
 * Lists **usable offcuts** above a configurable minimum length.
 * **Extra analysis:** which position causes the most waste and is therefore better ordered
   as a fixed length from the mill.
@@ -218,6 +237,22 @@ Every entry in the cutting plan has exactly one box to tick. Where identical bar
 check mark applies to all bars of that pattern (noted next to it); ticked entries are struck
 through and greyed out. Progress is counted in bars and shown per diameter and in total
 ("34 / 176 bars cut"). **Reset check marks** clears all of them after a confirmation prompt.
+
+### Progress in the bar list
+
+You tick off bars, but what you want to know is the state of each position. The **done** column in
+the bar list works that out backwards from the ticked bars: `8 / 12 · 4 open`, and for a fully cut
+position `12 / 12 · complete` in green with the row struck through. The column updates the moment a
+check mark is set — no recalculation needed.
+
+Three special cases:
+
+* **"–"** — no cutting plan has been calculated yet.
+* **"not in the plan"** — the position is a fixed length, comes from a coil, or is longer than the
+  stock bar; it is not cut and therefore cannot be ticked off.
+* **"recalculate"** — quantity, ø, length or the *fixed* tick box changed after the last
+  calculation. The progress would refer to values other than the ones on screen, so it is
+  deliberately no longer shown.
 
 They are stored in two places:
 
@@ -300,8 +335,8 @@ German text is used automatically.
 
 ## Tests
 
-Im Ordner [`tests/`](tests/) liegen Regressionstests für die Erledigt-Haken und für
-**Als Datei speichern**. Sie öffnen `schneideplan.html` in einem echten Browser und bedienen sie
+Im Ordner [`tests/`](tests/) liegen Regressionstests für die Erledigt-Haken, für den Fortschritt
+je Position in der Stückliste und für **Als Datei speichern**. Sie öffnen `schneideplan.html` in einem echten Browser und bedienen sie
 wie ein Anwender (`cd tests && npm ci && npm test`, Details in [`tests/README.md`](tests/README.md)).
 
 Sie laufen bei jedem Push und jedem Pull Request automatisch, und die Online-Version wird nur

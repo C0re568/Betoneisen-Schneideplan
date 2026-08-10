@@ -39,6 +39,18 @@ Neuberechnen und beim Umschalten der Gruppierung am ehesten kaputtgeht:
 * Haken verfallen, wenn eine Neuberechnung das Schnittmuster ändert,
 * keine JavaScript-Fehler in der Konsole.
 
+`stueckliste-fortschritt.test.mjs` deckt die Spalte **erledigt** in der Stückliste ab — die
+Rückrechnung von den abgehakten Stangen auf die einzelnen Positionen:
+
+* vor der Berechnung steht die Spalte neutral, danach jede Position auf „offen",
+* ein Haken im Plan schlägt genau bei den betroffenen Positionen durch, Stück für Stück,
+* vollständig geschnittene Positionen werden grün und durchgestrichen dargestellt,
+* Abwählen und **Haken zurücksetzen** nehmen den Fortschritt zurück,
+* eine nach der Berechnung geänderte Zeile verlangt „neu rechnen", die übrigen bleiben unberührt,
+* Fixlängen stehen als „nicht im Plan" und lassen sich nicht abhaken,
+* die Beschriftungen wechseln mit der Sprache,
+* keine JavaScript-Fehler in der Konsole.
+
 `datei-speichern.test.mjs` deckt den Knopf **Als Datei speichern** ab:
 
 * lokal geöffnet (`file://`) bleibt der Knopf verborgen — dort hat man die Datei bereits,
