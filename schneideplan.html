@@ -1,3 +1,4 @@
+<!doctype html>
 <meta charset="utf-8">
 <title>Schneideplan Betoneisen</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -132,6 +133,9 @@
   .langsw button:hover{color:var(--ink)}
   .langsw button[aria-pressed="true"]{background:var(--accent); color:#fff; font-weight:600}
   .langsw button[aria-pressed="true"]:hover{color:#fff}
+  /* dezenter Knopf in der Kopfzeile; steht links neben dem Sprachumschalter */
+  .ghost{margin-right:auto; padding:5px 12px; font-size:13px; font-weight:400; color:var(--muted); border-radius:999px}
+  .ghost:hover{color:var(--ink); border-color:var(--muted)}
 
   @media print{
     body{background:#fff}
@@ -145,6 +149,7 @@
 
 <div class="wrap">
   <div class="topbar no-print">
+    <button type="button" id="btnSaveApp" class="hidden ghost" data-i18n="btn.saveApp" data-i18n-title="btn.saveAppHint"></button>
     <span class="small muted" data-i18n="lang.label"></span>
     <div class="langsw" id="langsw" role="group" aria-label="Sprache / Language">
       <button type="button" data-lang="de" aria-pressed="true">Deutsch</button>
@@ -239,6 +244,9 @@ const I18N = {
     "btn.calcBusy": "rechnet …",
     "btn.print": "Drucken / PDF",
     "btn.resetDone": "Haken zurücksetzen",
+    "btn.saveApp": "Als Datei speichern",
+    "btn.saveAppHint": "Speichert dieses Werkzeug als einzelne HTML-Datei — danach auch ohne Internet zu benutzen.",
+    "msg.saveAppFail": "Die Datei konnte nicht geladen werden. Sie lässt sich auch über das Menü des Browsers speichern („Seite speichern unter …“).",
 
     "dia.h": "Material je Durchmesser",
     "dia.stock": "Lagerlänge [m]",
@@ -382,6 +390,9 @@ const I18N = {
     "btn.calcBusy": "calculating …",
     "btn.print": "Print / PDF",
     "btn.resetDone": "Reset check marks",
+    "btn.saveApp": "Save as file",
+    "btn.saveAppHint": "Saves this tool as a single HTML file — usable without an internet connection afterwards.",
+    "msg.saveAppFail": "The file could not be loaded. You can also save it from the browser menu (“Save page as …”).",
 
     "dia.h": "Material per diameter",
     "dia.stock": "Stock length [m]",
@@ -728,6 +739,26 @@ $("btnResetDone").onclick = () => {
   refreshTicks(); save();
 };
 $("btnPrint").onclick = () => window.print();
+
+/* „Als Datei speichern": lädt die ausgelieferte Datei erneut und bietet sie zum
+   Herunterladen an. Bewusst nicht das laufende DOM serialisiert — das würde die
+   bereits eingetippten Daten und den gerechneten Plan mit einbacken. So bekommt
+   man immer das saubere Original.
+   Wer die Datei lokal geöffnet hat, hat sie bereits: dann bleibt der Knopf weg
+   (fetch scheitert unter file:// ohnehin an der Sicherheitsregel des Browsers). */
+if (location.protocol === "http:" || location.protocol === "https:") {
+  $("btnSaveApp").classList.remove("hidden");
+  $("btnSaveApp").onclick = async () => {
+    try {
+      const res = await fetch(location.href, { cache: "no-store" });
+      if (!res.ok) throw new Error(res.status);
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement("a");
+      a.href = url; a.download = "schneideplan.html"; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch (_) { alert(t("msg.saveAppFail")); }
+  };
+}
 $("btnExport").onclick = () => {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
   const a = document.createElement("a");
@@ -1347,6 +1378,7 @@ function applyStatic() {
   document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
   document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
   document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("[data-i18n-title]").forEach(el => { el.title = t(el.dataset.i18nTitle); });
   document.querySelectorAll("#langsw button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
   if (restoreNote) restoreNote.innerHTML = t("msg.restored", { n: Object.keys(state.done || {}).length });
 }

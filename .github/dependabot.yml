@@ -1,0 +1,23 @@
+version: 2
+
+# Das Werkzeug selbst hat keine Abhängigkeiten. Altern können nur die Versionen
+# der GitHub-Actions in den Workflows und Playwright für die Tests — dafür macht
+# Dependabot von sich aus Pull Requests auf, die CI prüft sie wie jede andere
+# Änderung. Monatlich reicht, häufiger wäre nur Rauschen.
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: /tests
+    schedule:
+      interval: monthly
+    groups:
+      tests:
+        patterns: ["*"]

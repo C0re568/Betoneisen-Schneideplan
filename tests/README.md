@@ -9,10 +9,13 @@ nur, wer die Tests laufen lassen will.
 
 ```bash
 cd tests
-npm install
+npm ci
 npx playwright install chromium   # einmalig, lädt den Browser
 npm test
 ```
+
+Dieselben Tests laufen bei jedem Push und jedem Pull Request automatisch
+(`.github/workflows/ci.yml`). Die Online-Version wird nur veröffentlicht, wenn sie grün sind.
 
 Ist bereits ein Chromium vorhanden, lässt sich der Download überspringen:
 
@@ -35,6 +38,14 @@ Neuberechnen und beim Umschalten der Gruppierung am ehesten kaputtgeht:
 * Haken überstehen einen Reload (Browser-Speicher),
 * Haken verfallen, wenn eine Neuberechnung das Schnittmuster ändert,
 * keine JavaScript-Fehler in der Konsole.
+
+`datei-speichern.test.mjs` deckt den Knopf **Als Datei speichern** ab:
+
+* lokal geöffnet (`file://`) bleibt der Knopf verborgen — dort hat man die Datei bereits,
+* online erscheint er, samt Beschriftung in beiden Sprachen,
+* gespeichert wird das unveränderte Original, nicht das laufende DOM: der Test tippt vorher
+  Daten ein und rechnet einen Plan, die Datei muss trotzdem Byte für Byte der Quelle entsprechen,
+* die gespeicherte Datei ist für sich lauffähig und rechnet lokal ohne Fehler weiter.
 
 Geprüft wird gegen die eingebauten Beispieldaten. Ändern sich diese, passen sich die Tests
 mit an — sie rechnen die erwarteten Zahlen aus dem gerenderten Plan aus, statt sie fest

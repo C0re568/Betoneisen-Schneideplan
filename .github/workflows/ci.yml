@@ -1,0 +1,74 @@
+name: CI
+
+# Bei jedem Push und jedem Pull Request laufen die Regressionstests.
+# Nur wenn sie grün sind, geht die Seite auf main online — die veröffentlichte
+# Fassung kann damit nicht kaputt sein, ohne dass es vorher auffällt.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Überholte PR-Läufe abbrechen, einen laufenden Deploy auf main dagegen nie.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Abhängigkeiten installieren
+        working-directory: tests
+        run: npm ci
+
+      - name: Browser bereitstellen
+        working-directory: tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Tests
+        working-directory: tests
+        run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # schneideplan.html behält im Repository ihren sprechenden Namen; für die
+      # Seite kommt sie zusätzlich als index.html unter die kurze Wurzel-Adresse.
+      - name: Seite zusammenstellen
+        run: |
+          mkdir -p site
+          cp schneideplan.html site/index.html
+          cp schneideplan.html site/schneideplan.html
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

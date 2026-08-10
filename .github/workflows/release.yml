@@ -1,0 +1,42 @@
+name: Release
+
+# Ein Tag der Form v1.0.0 erzeugt einen Release mit schneideplan.html als Anhang.
+# Damit zeigt
+#   .../releases/latest/download/schneideplan.html
+# dauerhaft auf die jeweils neueste Fassung.
+#
+#   git tag -a v1.0.0 -m "Erste Fassung"
+#   git push origin v1.0.0
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Release anlegen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" schneideplan.html \
+            --title "Schneideplan Betoneisen $GITHUB_REF_NAME" \
+            --generate-notes \
+            --notes "$(cat <<'TEXT'
+          **Online benutzen / use online:** https://c0re568.github.io/Betoneisen-Schneideplan/
+
+          **Herunterladen:** `schneideplan.html` liegt unten als Anhang bereit — eine einzige Datei
+          ohne Abhängigkeiten, per Doppelklick im Browser zu öffnen, funktioniert auch ohne Internet.
+
+          **Download:** `schneideplan.html` is attached below — a single file with no dependencies,
+          open it in a browser by double-clicking; it works offline as well.
+          TEXT
+          )"
