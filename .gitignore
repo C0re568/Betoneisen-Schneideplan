@@ -2,3 +2,7 @@
 schneideplan-daten.json
 projekt-*.json
 *.local.json
+
+# Testabhängigkeiten (nur für die Entwicklung, siehe tests/README.md)
+node_modules/
+

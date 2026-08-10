@@ -16,7 +16,8 @@ Im Browser öffnen (Doppelklick), es wird nichts installiert und nichts hochgela
   * Schnittmuster-Übersicht (was wird wie oft geschnitten),
   * Plan Stange für Stange mit Positions-Kennzeichnung je Stück (identische Stangen zusammengefasst),
   * Rückwärts-Zuordnung „Position → aus welchen Stangen geschnitten".
-* **Erledigt-Haken je Stange** zum Abhaken während des Schneidens, mit Fortschrittsanzeige.
+* **Erledigt-Haken je Plan-Eintrag** zum Abhaken während des Schneidens, mit Fortschrittsanzeige
+  in Stangen.
 * Listet **verwertbare Reststücke** ab einer einstellbaren Mindestlänge.
 * **Zusatzauswertung:** welche Position den meisten Verschnitt verursacht und daher besser
   in Fixlängen ab Werk bestellt wird.
@@ -44,10 +45,12 @@ Reststangen erscheinen im Plan als `R12-01` (maßstäblich kürzer gezeichnet), 
 
 ## Erledigt-Haken
 
-Jede Stange im Schneideplan hat ein Kästchen zum Abhaken. Bei zusammengefassten Stangen
-erscheint ein Kästchen je Stangennummer plus ein Schalter **alle**; abgehakte Stangen werden
-durchgestrichen und ausgegraut. Der Fortschritt wird je Durchmesser und gesamt angezeigt
-(„34 / 176 Stangen geschnitten"). **Haken zurücksetzen** löscht alle Haken nach Rückfrage.
+Jeder Eintrag im Schneideplan hat genau ein Kästchen zum Abhaken. Fasst die Ausgabe
+identische Stangen zusammen, hakt dieses eine Kästchen alle Stangen des Schnittmusters
+gemeinsam ab („gilt für alle 12 Stangen dieses Musters"); abgehakte Einträge werden
+durchgestrichen und ausgegraut. Gezählt wird trotzdem in Stangen, nicht in Einträgen:
+der Fortschritt je Durchmesser und gesamt zeigt „34 / 176 Stangen geschnitten".
+**Haken zurücksetzen** löscht alle Haken nach Rückfrage.
 
 Gespeichert wird an zwei Stellen:
 
@@ -102,3 +105,12 @@ Längenkombination nicht immer erreichbar.
 * **Drucken / PDF** — druckoptimierte Ausgabe für die Baustelle.
 * **aus Ring** — je Durchmesser aktivierbar: Material vom Ring (gerichteter Betonstahl) wird
   auf Länge abgelängt, es entsteht kein Schneideverschnitt.
+
+## Tests
+
+Im Ordner [`tests/`](tests/) liegen Regressionstests für die Erledigt-Haken. Sie öffnen
+`schneideplan.html` in einem echten Browser und bedienen sie wie ein Anwender
+(`cd tests && npm install && npm test`, Details in [`tests/README.md`](tests/README.md)).
+
+Das Werkzeug bleibt davon unberührt — es ist weiterhin eine einzelne HTML-Datei ohne
+Abhängigkeiten. Installiert wird nur, wer die Tests laufen lassen möchte.
