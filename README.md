@@ -129,6 +129,9 @@ Längenkombination nicht immer erreichbar.
   Eingabefelder, in der gerade gewählten Sprache).
 * **aus Ring** — je Durchmesser aktivierbar: Material vom Ring (gerichteter Betonstahl) wird
   auf Länge abgelängt, es entsteht kein Schneideverschnitt.
+* **Als Datei speichern** — nur online sichtbar: legt das Werkzeug als einzelne HTML-Datei ab,
+  für die Arbeit ohne Internet. Gespeichert wird immer die unveränderte Datei, nicht der
+  gerade eingetippte Stand — Daten wandern über Export/Import JSON mit.
 
 ### Online oder lokal
 
@@ -138,6 +141,8 @@ Beides ist dasselbe Werkzeug, die Wahl ist reine Bequemlichkeit:
   der Link lässt sich weitergeben und am Handy als Lesezeichen ablegen. Gerechnet wird trotzdem
   ausschließlich im Browser; es werden keine Daten an einen Server geschickt.
 * **Lokal** als heruntergeladene Datei — funktioniert ohne Internet, etwa auf der Baustelle.
+  Der Knopf **Als Datei speichern** oben links auf der Online-Seite legt sie ab; lokal geöffnet
+  ist der Knopf ausgeblendet, weil man die Datei dann ja schon hat.
 
 Ein Hinweis zum Speicher: Eingaben und gesetzte Haken liegen im Speicher des Browsers, und der
 ist **je Adresse getrennt**. Wer bisher die lokale Datei benutzt hat, findet seine Daten unter
@@ -263,6 +268,9 @@ not always reachable.
   fields, in the language currently selected).
 * **From coil** — can be enabled per diameter: material from a coil (straightened rebar) is cut to
   length, so no cutting waste occurs.
+* **Save as file** — only visible online: stores the tool as a single HTML file for working
+  without an internet connection. What gets saved is always the unmodified file, not the state
+  you just typed in — data travels via export/import JSON.
 
 ### Online or local
 
@@ -272,6 +280,8 @@ Both are the same tool; pick whichever is more convenient:
   link can be shared and bookmarked on a phone. Everything is still calculated in the browser
   alone; no data is sent to a server.
 * **Local**, as a downloaded file — works without an internet connection, e.g. on site.
+  The **Save as file** button at the top left of the online page stores it; when the file is
+  already open locally the button is hidden, since you have the file at that point.
 
 One note about storage: inputs and check marks live in the browser's storage, which is **kept
 separately per address**. If you have been using the local file, your data will not show up at
@@ -288,9 +298,13 @@ German text is used automatically.
 
 ## Tests
 
-Im Ordner [`tests/`](tests/) liegen Regressionstests für die Erledigt-Haken. Sie öffnen
-`schneideplan.html` in einem echten Browser und bedienen sie wie ein Anwender
-(`cd tests && npm install && npm test`, Details in [`tests/README.md`](tests/README.md)).
+Im Ordner [`tests/`](tests/) liegen Regressionstests für die Erledigt-Haken und für
+**Als Datei speichern**. Sie öffnen `schneideplan.html` in einem echten Browser und bedienen sie
+wie ein Anwender (`cd tests && npm ci && npm test`, Details in [`tests/README.md`](tests/README.md)).
+
+Sie laufen bei jedem Push und jedem Pull Request automatisch, und die Online-Version wird nur
+veröffentlicht, wenn sie grün sind — kaputt kann dort also nichts landen, ohne dass es vorher
+auffällt.
 
 Das Werkzeug bleibt davon unberührt — es ist weiterhin eine einzelne HTML-Datei ohne
 Abhängigkeiten. Installiert wird nur, wer die Tests laufen lassen möchte.
