@@ -159,7 +159,9 @@
   hr{border:none; border-top:1px solid var(--line); margin:18px 0}
 
   /* Sprachumschalter / language switch */
-  .topbar{display:flex; justify-content:flex-end; align-items:center; gap:8px; margin:0 0 12px}
+  .topbar{display:flex; justify-content:flex-end; align-items:center; gap:8px; margin:0 0 12px; flex-wrap:wrap}
+  /* linke Gruppe der Kopfzeile (Datei speichern, Projektlink) */
+  .topbar .tb-left{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-right:auto}
   .langsw{display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--panel)}
   .langsw button{border:none; border-radius:0; background:transparent; color:var(--muted); padding:5px 14px; font-size:13px}
   .langsw button + button{border-left:1px solid var(--line)}
@@ -167,8 +169,12 @@
   .langsw button[aria-pressed="true"]{background:var(--accent); color:#fff; font-weight:600}
   .langsw button[aria-pressed="true"]:hover{color:#fff}
   /* dezenter Knopf in der Kopfzeile; steht links neben dem Sprachumschalter */
-  .ghost{margin-right:auto; padding:5px 12px; font-size:13px; font-weight:400; color:var(--muted); border-radius:999px}
+  .ghost{padding:5px 12px; font-size:13px; font-weight:400; color:var(--muted); border-radius:999px}
   .ghost:hover{color:var(--ink); border-color:var(--muted)}
+  /* derselbe Knopf als Link (Projekt auf GitHub) */
+  a.ghost{display:inline-flex; align-items:center; gap:6px; text-decoration:none; line-height:1.5;
+          background:var(--panel); border:1px solid var(--line)}
+  a.ghost svg{width:15px; height:15px; fill:currentColor; flex:none}
 
   /* Aktionsleiste: der Knopf „berechnen" steht dort, wo die Eingabe endet.
      Am Telefon klebt sie unten am Bildschirmrand und ist immer erreichbar. */
@@ -203,6 +209,8 @@
     input,select{font-size:16px; padding:9px 10px}
     button{padding:10px 14px}
     button.mini{padding:6px 11px; font-size:13px}
+    /* am Telefon so groß antippbar wie die Knöpfe daneben */
+    .ghost{padding:8px 13px}
     input[type=checkbox]{width:20px; height:20px}
     .cards{grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
     .kpi .v{font-size:18px}
@@ -305,7 +313,17 @@
 
 <div class="wrap">
   <div class="topbar no-print">
-    <button type="button" id="btnSaveApp" class="hidden ghost" data-i18n="btn.saveApp" data-i18n-title="btn.saveAppHint"></button>
+    <div class="tb-left">
+      <button type="button" id="btnSaveApp" class="hidden ghost" data-i18n="btn.saveApp" data-i18n-title="btn.saveAppHint"></button>
+      <!-- Projektseite: Quellcode, neue Fassungen, Fehlermeldungen. Steht auch in der
+           heruntergeladenen Datei, damit man von dort zur Online-Fassung zurückfindet. -->
+      <a class="ghost" id="lnkRepo" href="https://github.com/C0re568/Betoneisen-Schneideplan"
+         target="_blank" rel="noopener noreferrer"
+         data-i18n-title="btn.repoHint">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span data-i18n="btn.repo"></span>
+      </a>
+    </div>
     <span class="small muted" data-i18n="lang.label"></span>
     <div class="langsw" id="langsw" role="group" aria-label="Sprache / Language">
       <button type="button" data-lang="de" aria-pressed="true">Deutsch</button>
@@ -425,6 +443,8 @@ const I18N = {
     "btn.saveApp": "Als Datei speichern",
     "btn.saveAppHint": "Speichert dieses Werkzeug als einzelne HTML-Datei — danach auch ohne Internet zu benutzen.",
     "msg.saveAppFail": "Die Datei konnte nicht geladen werden. Sie lässt sich auch über das Menü des Browsers speichern („Seite speichern unter …“).",
+    "btn.repo": "Projekt auf GitHub",
+    "btn.repoHint": "Quelltext, aktuelle Fassung und Fehlermeldungen auf GitHub — auch die Online-Fassung des Werkzeugs steht dort.",
 
     "dia.h": "Material je Durchmesser",
     "dia.stock": "Lagerlänge [m]",
@@ -594,6 +614,8 @@ const I18N = {
     "btn.saveApp": "Save as file",
     "btn.saveAppHint": "Saves this tool as a single HTML file — usable without an internet connection afterwards.",
     "msg.saveAppFail": "The file could not be loaded. You can also save it from the browser menu (“Save page as …”).",
+    "btn.repo": "Project on GitHub",
+    "btn.repoHint": "Source code, latest version and issue tracker on GitHub — the online version of the tool lives there too.",
 
     "dia.h": "Material per diameter",
     "dia.stock": "Stock length [m]",
