@@ -1,0 +1,12 @@
+{
+  "name": "schneideplan-tests",
+  "private": true,
+  "type": "module",
+  "description": "Regressionstests für schneideplan.html. Nur für die Entwicklung — das Werkzeug selbst braucht nichts davon.",
+  "scripts": {
+    "test": "node erledigt-haken.test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}
