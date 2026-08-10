@@ -100,7 +100,7 @@
   .tick:hover{border-color:var(--accent)}
   .tick input{margin:0; width:13px; height:13px; accent-color:var(--accent)}
   .tick.on{background:var(--ok-soft); border-color:var(--ok); color:var(--ok); text-decoration:line-through}
-  .tickcount{font-size:11px; font-weight:600; color:var(--muted); margin-right:2px; white-space:nowrap}
+  .tickcount{font-size:11px; color:var(--muted); white-space:nowrap}
   .bar.alldone .bar-vis{opacity:.4}
   .bar.alldone .bar-head b{text-decoration:line-through}
   .prog{font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums}
@@ -411,7 +411,6 @@ $("btnResetDone").onclick = () => {
   const n = Object.keys(state.done || {}).length;
   if (n && !confirm(`${n} gesetzte Haken zurücksetzen?`)) return;
   state.done = {};
-  document.querySelectorAll("#out [data-done]").forEach(cb => { cb.checked = false; });
   refreshTicks(); save();
 };
 $("btnPrint").onclick = () => window.print();
@@ -705,48 +704,52 @@ function doneKey(b) {
   return `${b.id}|${b.cap}|${b.pieces.map(p => p.it.label + ":" + p.len).join(",")}`;
 }
 
+/* Je Eintrag im Schneideplan gibt es genau einen Haken. Dahinter stehen aber weiterhin
+   die Schlüssel aller Stangen dieses Eintrags, damit der Fortschritt in Stangen zählt
+   und ein Umschalten der Gruppierung die gesetzten Haken nicht verwirft. */
+let tickGroups = [];
+
+function tickKeys(cb) { return tickGroups[+cb.dataset.donegrp] || []; }
+
 function refreshTicks() {
+  const stat = root => {
+    let n = 0, done = 0;
+    root.querySelectorAll("[data-donegrp]").forEach(cb => {
+      const keys = tickKeys(cb);
+      n += keys.length; done += keys.filter(k => state.done[k]).length;
+    });
+    return { n, done };
+  };
   document.querySelectorAll("#out .bar").forEach(bar => {
-    const cbs = [...bar.querySelectorAll("[data-done]")];
-    const done = cbs.filter(c => c.checked).length;
-    cbs.forEach(c => c.closest(".tick").classList.toggle("on", c.checked));
-    bar.classList.toggle("alldone", cbs.length > 0 && done === cbs.length);
-    const tc = bar.querySelector(".tickcount");
-    if (tc) tc.textContent = cbs.length > 1 ? `${done} / ${cbs.length} geschnitten` : "";
+    const cb = bar.querySelector("[data-donegrp]"); if (!cb) return;
+    const keys = tickKeys(cb), done = keys.filter(k => state.done[k]).length;
+    cb.checked = keys.length > 0 && done === keys.length;
+    cb.indeterminate = done > 0 && done < keys.length;   // nur bei importierten Altdaten möglich
+    cb.closest(".tick").classList.toggle("on", cb.checked);
+    bar.classList.toggle("alldone", cb.checked);
   });
   document.querySelectorAll("#out [data-prog]").forEach(el => {
-    const cbs = [...(el.closest(".panel") || document).querySelectorAll("[data-done]")];
-    const done = cbs.filter(c => c.checked).length;
-    el.innerHTML = cbs.length ? `<b>${done}</b> / ${cbs.length} Stangen geschnitten` : "";
+    const s = stat(el.closest(".panel") || document);
+    el.innerHTML = s.n ? `<b>${s.done}</b> / ${s.n} Stangen geschnitten` : "";
   });
   const box = $("progAll");
   if (box) {
-    const cbs = [...document.querySelectorAll("#out [data-done]")];
-    const done = cbs.filter(c => c.checked).length;
+    const s = stat($("out"));
     box.innerHTML = `<div class="k">Fortschritt Zuschnitt</div>
-      <div class="v"${done && done === cbs.length ? ` style="color:var(--ok)"` : ""}>${done} / ${cbs.length}</div>
-      <div class="n">Stangen abgehakt · ${NF(cbs.length ? done / cbs.length * 100 : 0, 0)} %</div>`;
+      <div class="v"${s.done && s.done === s.n ? ` style="color:var(--ok)"` : ""}>${s.done} / ${s.n}</div>
+      <div class="n">Stangen abgehakt · ${NF(s.n ? s.done / s.n * 100 : 0, 0)} %</div>`;
   }
 }
 
 $("out").addEventListener("change", e => {
-  const cb = e.target.closest("[data-done]"); if (!cb) return;
-  if (cb.checked) state.done[cb.dataset.done] = true; else delete state.done[cb.dataset.done];
-  refreshTicks(); save();
-});
-$("out").addEventListener("click", e => {
-  const btn = e.target.closest("[data-alldone]"); if (!btn) return;
-  const cbs = [...btn.closest(".bar").querySelectorAll("[data-done]")];
-  const target = !cbs.every(c => c.checked);
-  cbs.forEach(c => {
-    c.checked = target;
-    if (target) state.done[c.dataset.done] = true; else delete state.done[c.dataset.done];
-  });
+  const cb = e.target.closest("[data-donegrp]"); if (!cb) return;
+  tickKeys(cb).forEach(k => { if (cb.checked) state.done[k] = true; else delete state.done[k]; });
   refreshTicks(); save();
 });
 
 function render(results, errors, minRest) {
   const out = [];
+  tickGroups = [];
 
   // Gesamtübersicht
   let gStock = 0, gNeed = 0, gWaste = 0, gBars = 0, gFixKg = 0, gRestKg = 0, gRestBars = 0;
@@ -868,6 +871,7 @@ function render(results, errors, minRest) {
       b.pieces.forEach(p => { const k = p.it.label + "|" + p.len; counts.set(k, (counts.get(k) || 0) + 1); });
       const ids = b.ids, rangeTxt = ids.length === 1 ? ids[0]
         : (ids.length > 2 ? `${ids[0]} – ${ids[ids.length - 1]}` : ids.join(", "));
+      const gi = tickGroups.push(b.members.map(mb => mb.key)) - 1;
       out.push(`<div class="bar">
         <div class="bar-head">
           <span>${ids.length > 1 ? `<b>${ids.length}× Stangen</b> <span class="muted">${rangeTxt}</span>` : `<b>${ids[0]}</b>`}
@@ -881,12 +885,11 @@ function render(results, errors, minRest) {
           return `<span class="chip">${n}× ${esc(lab)} &nbsp;${NF(m(+L))} m${ids.length > 1 ? ` <span class="muted">(je Stange)</span>` : ""}</span>`;
         }).join("")}</div>
         <div class="ticks">
-          <span class="tickcount"></span>
-          ${b.members.length > 1 ? `<button class="mini no-print" data-alldone="1">alle</button>` : ""}
-          ${b.members.map(mb => `<label class="tick${state.done[mb.key] ? " on" : ""}">
-            <input type="checkbox" data-done="${esc(mb.key)}"${state.done[mb.key] ? " checked" : ""}>
-            <span>${b.members.length > 1 ? esc(mb.id.split("-")[1]) : "erledigt"}</span>
-          </label>`).join("")}
+          <label class="tick">
+            <input type="checkbox" data-donegrp="${gi}">
+            <span>erledigt</span>
+          </label>
+          ${b.members.length > 1 ? `<span class="tickcount">gilt für alle ${b.members.length} Stangen dieses Musters</span>` : ""}
         </div>
       </div>`);
     });
