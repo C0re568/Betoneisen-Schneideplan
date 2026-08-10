@@ -138,6 +138,26 @@ Längenkombination nicht immer erreichbar.
 
 ### Bedienung
 
+Die Oberfläche führt in drei Schritten von oben nach unten, danach kommt das Ergebnis:
+
+1. **Stücklisten** — was geschnitten werden soll. Das ist der eigentliche Eintipp-Teil und
+   steht deshalb ganz oben.
+2. **Material** — Lagerlänge, Mindestrest, Rechenaufwand und die Einstellungen je Durchmesser.
+   Aufklappbar; zugeklappt steht die Zusammenfassung daneben („Lagerlänge 7,00 m ·
+   Mindestrest 1,00 m · ø 8, 12"). Die Durchmesser stehen erst fest, wenn die Stücklisten
+   eingetippt sind — darum kommt dieser Schritt danach.
+3. **Reststangen** — optional, standardmäßig zugeklappt.
+
+Darunter steht **Schneideplan berechnen**, also dort, wo die Eingabe endet. Wird nach der
+Berechnung noch etwas an der Eingabe geändert, blendet sich das Ergebnis ab und der Knopf
+heißt **Neu berechnen** — ein überholter Plan bleibt nicht kommentarlos stehen.
+
+Am Telefon klebt diese Leiste am unteren Bildschirmrand und zeigt zusätzlich den Fortschritt
+(„12 / 27 Stangen geschnitten") sowie einen Sprungknopf zwischen Eingabe und Plan. Tabellen
+werden dort nicht seitlich weggescrollt, sondern zu Karten umgebrochen: je Zeile eine Karte,
+die Spaltenköpfe stehen als Beschriftung am Wert. Die Eingabefelder sind auf Fingerbedienung
+ausgelegt, und der Erledigt-Haken im Plan ist eine Fläche über die volle Breite.
+
 * **Beispieldaten laden** — ein bewusst kleines Beispiel zum Überschreiben: zwei Stücklisten
   („Platte" mit 3 Positionen, „Unterzug" mit 2), zwei Durchmesser und eine vorhandene
   Reststange. Es zeigt alle Bausteine an einem Fall, den man auf einen Blick nachvollzieht —
@@ -294,6 +314,25 @@ secondarily by the largest (and therefore reusable) offcut. The theoretical lowe
 not always reachable.
 
 ### Usage
+
+The interface walks through three steps from top to bottom, with the result underneath:
+
+1. **Bar lists** — what is to be cut. This is the part you actually type in, so it comes first.
+2. **Material** — stock length, minimum offcut, computing effort and the per-diameter settings.
+   Collapsible; when collapsed the summary sits next to the heading ("stock length 7.00 m ·
+   min. offcut 1.00 m · ø 8, 12"). The diameters are only known once the bar lists are filled
+   in, which is why this step follows them.
+3. **Remnant bars** — optional, collapsed by default.
+
+Below that sits **Calculate cutting plan**, right where the input ends. If anything in the
+input changes after a calculation, the result dims and the button reads **Recalculate** — an
+outdated plan is never left standing without a word.
+
+On a phone that bar sticks to the bottom of the screen and also shows the progress
+("12 / 27 bars cut") plus a jump button between input and plan. Tables are not scrolled
+sideways there but broken into cards: one card per row, with the column headings as labels
+next to the values. Input fields are sized for fingers, and the "done" check mark in the plan
+is a full-width target.
 
 * **Load sample data** — a deliberately small example to overwrite: two bar lists ("Slab" with
   3 positions, "Beam" with 2), two diameters and one remnant bar in stock. It shows every building

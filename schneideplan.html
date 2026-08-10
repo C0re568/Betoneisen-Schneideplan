@@ -56,6 +56,7 @@
   }
   input:focus,select:focus{outline:2px solid var(--accent); outline-offset:-1px}
   input[type=number]{font-variant-numeric:tabular-nums}
+  input[type=checkbox]{accent-color:var(--accent)}
   button{
     font:inherit; font-weight:500; cursor:pointer; color:var(--ink);
     background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:7px 12px;
@@ -64,7 +65,10 @@
   button.primary{background:var(--accent); border-color:var(--accent); color:#fff}
   button.primary:hover{filter:brightness(1.08)}
   button.mini{padding:2px 7px; font-size:12px; line-height:1.4}
+  button.danger:hover{border-color:var(--bad); color:var(--bad)}
   .btnbar{display:flex; flex-wrap:wrap; gap:8px}
+  .btnbar.sec button{font-size:13px; padding:5px 10px; color:var(--muted)}
+  .btnbar.sec button:hover{color:var(--ink)}
 
   table{border-collapse:collapse; width:100%; font-size:14px}
   th,td{text-align:left; padding:5px 8px; border-bottom:1px solid var(--line-soft); vertical-align:middle}
@@ -72,13 +76,33 @@
   td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
   .tbl-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch}
 
+  /* Aufklappbare Abschnitte (Schritt 2 und 3) — am Telefon zugeklappt,
+     damit der Weg von der Stückliste zum Knopf kurz bleibt. */
+  details.panel{padding:0}
+  details.panel > summary{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:14px 16px; cursor:pointer; list-style:none; font-size:17px; font-weight:600; letter-spacing:-.01em;
+  }
+  details.panel > summary::-webkit-details-marker{display:none}
+  details.panel > summary::after{
+    content:"⌄"; margin-left:auto; color:var(--muted); font-size:18px; line-height:1;
+    transform:translateY(-3px); transition:transform .15s;
+  }
+  details.panel[open] > summary::after{transform:rotate(180deg) translateY(-1px)}
+  details.panel > summary:hover{color:var(--accent)}
+  details.panel .body{padding:0 16px 16px}
+  .sum{font-size:13px; font-weight:400; color:var(--muted)}
+
   .list-card{border:1px solid var(--line); border-radius:var(--radius); padding:12px; margin-bottom:12px; background:var(--panel)}
   .list-head{display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap:wrap}
   .list-head input{font-weight:600; flex:1 1 220px}
   .rowtable input[type=text]{width:100%; min-width:64px}
   .rowtable input[type=number]{width:100%; min-width:56px}
+  .fixlbl{display:none}   /* am Telefon steht der Spaltenkopf am Feld, siehe unten */
 
   .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px}
+  .dia-grid{display:flex; flex-wrap:wrap; gap:10px}
+  .dia-grid > .kpi{flex:0 1 210px}
   .kpi{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--panel)}
   .kpi .k{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
   .kpi .v{font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
@@ -126,6 +150,7 @@
   .note.bad{border-color:var(--bad); background:var(--bad-soft)}
   .muted{color:var(--muted)}
   .small{font-size:12px}
+  .only-mob{display:none}   /* Gegenstück: .hide-mob, siehe Telefon-Block */
   details{margin-top:8px}
   summary{cursor:pointer; font-size:13px; color:var(--muted)}
   .hidden{display:none !important}
@@ -145,13 +170,136 @@
   .ghost{margin-right:auto; padding:5px 12px; font-size:13px; font-weight:400; color:var(--muted); border-radius:999px}
   .ghost:hover{color:var(--ink); border-color:var(--muted)}
 
+  /* Aktionsleiste: der Knopf „berechnen" steht dort, wo die Eingabe endet.
+     Am Telefon klebt sie unten am Bildschirmrand und ist immer erreichbar. */
+  .actionbar{margin:0 0 16px}
+  .ab-inner{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  #btnCalc{font-size:16px; padding:10px 20px}
+  .ab-note{font-size:13px; color:var(--muted)}
+  .ab-note.stale{color:var(--warn); font-weight:600}
+  #btnJump{display:none}
+  .ab-prog{display:none; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap}
+  .ab-prog b{color:var(--ok)}
+  body.hasresult .ab-prog{display:inline}
+  /* Ergebnis veraltet: Eingaben wurden nach der letzten Rechnung geändert. */
+  body.stale #out{opacity:.55}
+  body.stale #btnCalc{box-shadow:0 0 0 3px var(--accent-soft)}
+
+  #resultTools{margin:0 0 12px; align-items:center}
+
+  /* ---------- Telefon ---------- */
+  @media (max-width:760px){
+    /* Platz für die feste Leiste am unteren Rand; die Höhe meldet das Skript */
+    .wrap{padding:16px 12px calc(var(--abh, 60px) + 28px)}
+    h1{font-size:20px}
+    h2{font-size:16px}
+    h3{font-size:12px; letter-spacing:.04em}
+    .dia-grid > .kpi{flex:1 1 100%}
+    p.sub{font-size:13px; margin-bottom:16px}
+    .panel{padding:12px}
+    details.panel > summary{padding:12px; font-size:16px}
+    details.panel .body{padding:0 12px 12px}
+    /* Schriftgröße 16 px: kleinere Werte lassen iOS beim Antippen hineinzoomen. */
+    input,select{font-size:16px; padding:9px 10px}
+    button{padding:10px 14px}
+    button.mini{padding:6px 11px; font-size:13px}
+    input[type=checkbox]{width:20px; height:20px}
+    .cards{grid-template-columns:repeat(auto-fit,minmax(148px,1fr))}
+    .kpi .v{font-size:18px}
+
+    /* Kein Querscrollen mehr: jede Tabellenzeile wird zu einer eigenen Karte,
+       die Spaltenköpfe stehen als Beschriftung am Wert. */
+    .tbl-scroll{overflow-x:visible}
+    table.resp, table.resp tbody{display:block}
+    table.resp thead{display:none}
+    table.resp tr{
+      display:block; border:1px solid var(--line); border-radius:8px;
+      padding:8px 10px; margin-bottom:8px;
+    }
+    table.resp td{
+      display:flex; gap:12px; justify-content:space-between; align-items:baseline; flex-wrap:wrap;
+      border:none; padding:3px 0; text-align:right;
+    }
+    /* lange Aufzählungen (z. B. „geschnitten aus Stange") brauchen die volle Breite */
+    table.resp td.wide{display:block; text-align:left}
+    table.resp td.wide::before{display:block; margin-bottom:2px}
+    table.resp td::before{
+      content:attr(data-label); flex:0 0 auto; text-align:left;
+      font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600;
+    }
+    table.resp td.rowhead{
+      display:block; text-align:left; font-size:15px;
+      border-bottom:1px solid var(--line-soft); padding-bottom:6px; margin-bottom:4px;
+    }
+    table.resp td.rowhead::before{content:none}
+    table.resp td[data-label=""]::before{content:none}
+    table.resp td br{display:none}
+    table.resp td .small{margin-left:6px}
+    .only-mob{display:inline}
+    .hide-mob{display:none !important}
+
+    /* Eingabetabellen: eine Karte je Zeile, die Zahlenfelder nebeneinander. */
+    .rowtable, .rowtable tbody{display:block}
+    .rowtable thead{display:none}
+    .rowtable tr{
+      display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px 10px;
+      border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:10px;
+    }
+    .rowtable td{display:block; border:none; padding:0; text-align:left !important}
+    .rowtable td::before{
+      content:attr(data-label); display:block; margin-bottom:3px;
+      font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:600;
+    }
+    .rowtable td[data-label=""]::before{content:none}
+    .rowtable.pos td.c-pos {grid-area:1/1/2/3}
+    .rowtable.pos td.c-del {grid-area:1/3/2/4; align-self:center; text-align:right !important}
+    .rowtable.pos td.c-qty {grid-area:2/1/3/2}
+    .rowtable.pos td.c-dia {grid-area:2/2/3/3}
+    .rowtable.pos td.c-len {grid-area:2/3/3/4}
+    .rowtable.pos td.c-fix {grid-area:3/1/4/2; align-self:center}
+    .rowtable.pos td.c-done{grid-area:3/2/4/4; align-self:center; text-align:right !important}
+    .rowtable.pos td.c-fix label{display:inline-flex; gap:8px; align-items:center; font-size:13px; color:var(--ink)}
+    .fixlbl{display:inline}
+    .rowtable.rest td.c-dia {grid-area:1/1/2/2}
+    .rowtable.rest td.c-len {grid-area:1/2/2/3}
+    .rowtable.rest td.c-qty {grid-area:1/3/2/4}
+    .rowtable.rest td.c-note{grid-area:2/1/3/3}
+    .rowtable.rest td.c-del {grid-area:2/3/3/4; align-self:end; text-align:right !important}
+
+    /* Abhaken am Gerät: große Fläche, ein Griff je Eintrag. */
+    .bar{margin-bottom:16px}
+    .bar-vis{height:34px}
+    .ticks{margin-top:8px}
+    .tick{flex:1 1 auto; justify-content:center; padding:9px 12px; font-size:14px; font-family:inherit}
+    .tick input{width:20px; height:20px}
+    .tickcount{flex-basis:100%; text-align:center}
+
+    /* Aktionsleiste klebt unten */
+    .actionbar{
+      position:fixed; left:0; right:0; bottom:0; z-index:40; margin:0;
+      background:var(--panel); border-top:1px solid var(--line);
+      padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+      box-shadow:0 -2px 14px rgba(0,0,0,.14);
+    }
+    .ab-inner{gap:8px}
+    #btnCalc{flex:1 1 auto; min-width:0}
+    .ab-note{display:none}
+    body.hasresult #btnJump{display:inline-block; flex:0 0 auto; white-space:nowrap}
+    .ab-prog{order:-1; flex-basis:100%; text-align:center; margin-bottom:2px}
+    body.hasresult .ab-prog{display:block}
+    .grp-title .prog{margin-left:0 !important}
+  }
+
   @media print{
     body{background:#fff}
+    body.stale #out{opacity:1}
     .no-print{display:none !important}
     .panel,.list-card{border-color:#bbb; box-shadow:none}
     .wrap{max-width:none; padding:0}
     .seg{color:#000}
     a{text-decoration:none; color:inherit}
+    /* zum Drucken werden alle Klappen geöffnet (siehe beforeprint) */
+    details > summary{display:none}
   }
 </style>
 
@@ -169,54 +317,71 @@
   <p class="sub" data-i18n="app.sub"></p>
 
   <div class="panel no-print">
-    <h2 data-i18n="set.h"></h2>
-    <div class="row">
-      <label class="f"><span data-i18n="set.stockDefault"></span>
-        <input type="number" id="stockDefault" value="7" step="0.01" min="0.5" style="width:110px">
-      </label>
-      <label class="f"><span data-i18n="set.minRest"></span>
-        <input type="number" id="minRest" value="1.00" step="0.05" min="0" style="width:130px">
-      </label>
-      <label class="f" style="justify-content:flex-end">&nbsp;
-        <span class="small" style="display:flex; gap:6px; align-items:center; padding-bottom:7px; color:var(--ink)">
-          <input type="checkbox" id="groupSame" checked> <span data-i18n="set.groupSame"></span>
-        </span>
-      </label>
-      <label class="f"><span data-i18n="set.effort"></span>
-        <select id="effort">
-          <option value="1" data-i18n="set.effort1"></option>
-          <option value="2" selected data-i18n="set.effort2"></option>
-          <option value="3" data-i18n="set.effort3"></option>
-        </select>
-      </label>
-      <button class="primary" id="btnCalc" data-i18n="btn.calc"></button>
-      <button id="btnPrint" data-i18n="btn.print"></button>
-      <button id="btnResetDone" data-i18n="btn.resetDone"></button>
-    </div>
-    <div id="diaSettings" style="margin-top:12px"></div>
-  </div>
-
-  <div class="panel no-print">
-    <h2><span data-i18n="rest.h"></span> <span class="muted" style="font-weight:400; font-size:14px">(optional)</span></h2>
-    <p class="small muted" style="margin:-6px 0 10px" data-i18n="rest.intro"></p>
-    <div class="tbl-scroll" id="rests"></div>
-    <div class="btnbar" style="margin-top:10px">
-      <button id="btnAddRest" data-i18n="rest.add"></button>
-    </div>
-  </div>
-
-  <div class="panel no-print">
     <h2 data-i18n="lists.h"></h2>
     <div id="lists"></div>
     <div class="btnbar" style="margin-top:10px">
       <button id="btnAddList" data-i18n="lists.add"></button>
+    </div>
+    <div class="btnbar sec" style="margin-top:10px">
       <button id="btnDemo" data-i18n="lists.demo"></button>
-      <button id="btnClear" data-i18n="lists.clear"></button>
       <button id="btnExport" data-i18n="lists.export"></button>
       <button id="btnImport" data-i18n="lists.import"></button>
+      <button id="btnClear" class="danger" data-i18n="lists.clear"></button>
       <input type="file" id="fileImport" accept=".json,application/json" class="hidden">
     </div>
     <p class="small muted" style="margin:10px 0 0" data-i18n-html="lists.foot"></p>
+  </div>
+
+  <details class="panel no-print" id="secMaterial" open>
+    <summary><span data-i18n="set.h"></span> <span class="sum" id="matSum"></span></summary>
+    <div class="body">
+      <div class="row">
+        <label class="f"><span data-i18n="set.stockDefault"></span>
+          <input type="number" id="stockDefault" value="7" step="0.01" min="0.5" style="width:110px">
+        </label>
+        <label class="f"><span data-i18n="set.minRest"></span>
+          <input type="number" id="minRest" value="1.00" step="0.05" min="0" style="width:130px">
+        </label>
+        <label class="f"><span data-i18n="set.effort"></span>
+          <select id="effort">
+            <option value="1" data-i18n="set.effort1"></option>
+            <option value="2" selected data-i18n="set.effort2"></option>
+            <option value="3" data-i18n="set.effort3"></option>
+          </select>
+        </label>
+        <label class="f" style="justify-content:flex-end">&nbsp;
+          <span class="small" style="display:flex; gap:8px; align-items:center; padding-bottom:9px; color:var(--ink)">
+            <input type="checkbox" id="groupSame" checked> <span data-i18n="set.groupSame"></span>
+          </span>
+        </label>
+      </div>
+      <div id="diaSettings" style="margin-top:12px"></div>
+    </div>
+  </details>
+
+  <details class="panel no-print" id="secRests">
+    <summary><span data-i18n="rest.h"></span> <span class="sum" id="restSum"></span></summary>
+    <div class="body">
+      <p class="small muted" style="margin:0 0 10px" data-i18n="rest.intro"></p>
+      <div id="rests"></div>
+      <div class="btnbar" style="margin-top:10px">
+        <button id="btnAddRest" data-i18n="rest.add"></button>
+      </div>
+    </div>
+  </details>
+
+  <div class="actionbar no-print">
+    <div class="ab-inner">
+      <span class="ab-prog" id="abProg"></span>
+      <button class="primary" id="btnCalc" data-i18n="btn.calc"></button>
+      <button type="button" id="btnJump"></button>
+      <span class="ab-note" id="abNote"></span>
+    </div>
+  </div>
+
+  <div class="btnbar no-print hidden" id="resultTools">
+    <button id="btnPrint" data-i18n="btn.print"></button>
+    <button id="btnResetDone" data-i18n="btn.resetDone"></button>
   </div>
 
   <div id="out"></div>
@@ -240,7 +405,8 @@ const I18N = {
     "app.title": "Schneideplan Betoneisen",
     "app.sub": "Verschnittoptimierte Aufteilung von Stabpositionen auf Lagerstangen (1D-Zuschnittproblem). Schnittbreite wird ignoriert. Jedes geschnittene Stück bleibt seiner Position zugeordnet.",
 
-    "set.h": "1 · Einstellungen",
+    "set.h": "2 · Material",
+    "set.sum": v => `Lagerlänge ${v.cap} m · Mindestrest ${v.min} m${v.dia ? ` · ø ${v.dia}` : ""}`,
     "set.stockDefault": "Lagerlänge Standard [m]",
     "set.minRest": "Mind. verwertbares Reststück [m]",
     "set.groupSame": "identische Stangen zusammenfassen",
@@ -250,8 +416,12 @@ const I18N = {
     "set.effort3": "gründlich",
     "btn.calc": "Schneideplan berechnen",
     "btn.calcBusy": "rechnet …",
+    "btn.recalc": "Neu berechnen",
     "btn.print": "Drucken / PDF",
     "btn.resetDone": "Haken zurücksetzen",
+    "btn.toPlan": "Zum Plan ↓",
+    "btn.toInput": "Zur Eingabe ↑",
+    "msg.stale": "Eingaben geändert — neu berechnen",
     "btn.saveApp": "Als Datei speichern",
     "btn.saveAppHint": "Speichert dieses Werkzeug als einzelne HTML-Datei — danach auch ohne Internet zu benutzen.",
     "msg.saveAppFail": "Die Datei konnte nicht geladen werden. Sie lässt sich auch über das Menü des Browsers speichern („Seite speichern unter …“).",
@@ -260,13 +430,15 @@ const I18N = {
     "dia.stock": "Lagerlänge [m]",
     "dia.ring": "aus Ring (kein Verschnitt)",
 
-    "rest.h": "2 · Vorhandene Reststangen",
+    "rest.h": "3 · Reststangen",
+    "rest.sumNone": "optional — keine erfasst",
+    "rest.sum": v => `${v.n} Stück · ${v.len} m`,
     "rest.intro": "Verwertbare Reste aus früheren Schnitten, die noch am Lager liegen. Sie werden nur dann herangezogen, wenn dadurch tatsächlich neue Stangen eingespart werden — sonst bleiben sie unangetastet im Lager. Was nach dem Schnitt von einer Reststange übrig bleibt, wird wieder als Rest ausgewiesen.",
     "rest.none": "Keine Reststangen erfasst — es wird ausschließlich von neuen Lagerstangen geschnitten.",
     "rest.add": "+ Reststange",
     "rest.notePh": "Lagerplatz …",
 
-    "lists.h": "3 · Stücklisten",
+    "lists.h": "1 · Stücklisten",
     "lists.add": "+ Stückliste",
     "lists.demo": "Beispieldaten laden",
     "lists.clear": "Alles leeren",
@@ -276,8 +448,10 @@ const I18N = {
     "list.namePh": "Bezeichnung der Stückliste",
     "list.addRow": "+ Zeile",
     "list.del": "Liste löschen",
+    "list.delAsk": v => `Stückliste „${v.name}“ mit ${v.n} Zeile${v.n === 1 ? "" : "n"} löschen?`,
     "list.new": "Neue Stückliste",
     "list.first": "Stückliste 1",
+    "list.rows": v => `${v.n} Position${v.n === 1 ? "" : "en"}`,
 
     "th.pos": "Pos.",
     "th.qty": "Stück",
@@ -328,6 +502,7 @@ const I18N = {
     "prog.k": "Fortschritt Zuschnitt",
     "prog.n": v => `Stangen abgehakt · ${v.p} %`,
     "prog.bars": v => `<b>${v.done}</b> / ${v.n} Stangen geschnitten`,
+    "prog.short": v => `<b>${v.done}</b> / ${v.n} Stangen geschnitten · ${v.p} %`,
 
     "order.h": "Bestellung Lagerstangen",
     "th.stockLen": "Lagerlänge",
@@ -399,7 +574,8 @@ const I18N = {
     "app.title": "Rebar Cutting Plan",
     "app.sub": "Waste-optimised allocation of bar positions to stock bars (1D cutting-stock problem). Kerf width is ignored. Every cut piece stays assigned to its position.",
 
-    "set.h": "1 · Settings",
+    "set.h": "2 · Material",
+    "set.sum": v => `stock length ${v.cap} m · min. offcut ${v.min} m${v.dia ? ` · ø ${v.dia}` : ""}`,
     "set.stockDefault": "Default stock length [m]",
     "set.minRest": "Min. usable offcut [m]",
     "set.groupSame": "group identical bars",
@@ -409,8 +585,12 @@ const I18N = {
     "set.effort3": "thorough",
     "btn.calc": "Calculate cutting plan",
     "btn.calcBusy": "calculating …",
+    "btn.recalc": "Recalculate",
     "btn.print": "Print / PDF",
     "btn.resetDone": "Reset check marks",
+    "btn.toPlan": "To the plan ↓",
+    "btn.toInput": "To the input ↑",
+    "msg.stale": "Input changed — recalculate",
     "btn.saveApp": "Save as file",
     "btn.saveAppHint": "Saves this tool as a single HTML file — usable without an internet connection afterwards.",
     "msg.saveAppFail": "The file could not be loaded. You can also save it from the browser menu (“Save page as …”).",
@@ -419,13 +599,15 @@ const I18N = {
     "dia.stock": "Stock length [m]",
     "dia.ring": "from coil (no waste)",
 
-    "rest.h": "2 · Remnant bars in stock",
+    "rest.h": "3 · Remnant bars",
+    "rest.sumNone": "optional — none entered",
+    "rest.sum": v => `${v.n} pcs · ${v.len} m`,
     "rest.intro": "Usable remnants from earlier cuts that are still in the store. They are only used if doing so actually saves a new bar — otherwise they stay untouched in the store. Whatever is left of a remnant bar after cutting is reported as an offcut again.",
     "rest.none": "No remnant bars entered — everything is cut from new stock bars.",
     "rest.add": "+ Remnant bar",
     "rest.notePh": "Storage location …",
 
-    "lists.h": "3 · Bar lists",
+    "lists.h": "1 · Bar lists",
     "lists.add": "+ Bar list",
     "lists.demo": "Load sample data",
     "lists.clear": "Clear all",
@@ -435,8 +617,10 @@ const I18N = {
     "list.namePh": "Name of the bar list",
     "list.addRow": "+ Row",
     "list.del": "Delete list",
+    "list.delAsk": v => `Delete bar list “${v.name}” with ${v.n} row${v.n === 1 ? "" : "s"}?`,
     "list.new": "New bar list",
     "list.first": "Bar list 1",
+    "list.rows": v => `${v.n} position${v.n === 1 ? "" : "s"}`,
 
     "th.pos": "Pos.",
     "th.qty": "Qty",
@@ -487,6 +671,7 @@ const I18N = {
     "prog.k": "Cutting progress",
     "prog.n": v => `bars checked off · ${v.p} %`,
     "prog.bars": v => `<b>${v.done}</b> / ${v.n} bars cut`,
+    "prog.short": v => `<b>${v.done}</b> / ${v.n} bars cut · ${v.p} %`,
 
     "order.h": "Stock bar order",
     "th.stockLen": "Stock length",
@@ -637,14 +822,14 @@ function renderLists() {
       <div class="list-head">
         <span class="tag info">${listShort(li)}</span>
         <input type="text" value="${esc(L.name)}" data-act="name" placeholder="${esc(t("list.namePh"))}">
-        <button class="mini" data-act="addrow">${esc(t("list.addRow"))}</button>
-        <button class="mini" data-act="dellist">${esc(t("list.del"))}</button>
+        <span class="small muted">${esc(t("list.rows", { n: L.rows.length }))}</span>
+        <button class="mini danger" data-act="dellist">${esc(t("list.del"))}</button>
       </div>
       <div class="tbl-scroll">
-      <table class="rowtable">
+      <table class="rowtable pos">
         <thead><tr>
-          <th style="width:18%">${esc(t("th.pos"))}</th><th style="width:13%" class="num">${esc(t("th.qty"))}</th>
-          <th style="width:13%" class="num">${esc(t("th.dia"))}</th><th style="width:17%" class="num">${esc(t("th.len"))}</th>
+          <th style="width:18%">${esc(t("th.pos"))}</th><th style="width:13%">${esc(t("th.qty"))}</th>
+          <th style="width:13%">${esc(t("th.dia"))}</th><th style="width:17%">${esc(t("th.len"))}</th>
           <th style="width:11%">${esc(t("th.fix"))}</th>
           <th style="width:20%" class="num" title="${esc(t("th.doneHint"))}">${esc(t("th.done"))}</th>
           <th style="width:8%"></th>
@@ -652,21 +837,25 @@ function renderLists() {
         <tbody>
         ${L.rows.map((r, ri) => `
           <tr data-ri="${ri}">
-            <td><input type="text" value="${esc(r.pos)}" data-f="pos"></td>
-            <td><input type="number" value="${r.qty}" min="0" step="1" data-f="qty"></td>
-            <td><input type="number" value="${r.dia}" min="1" step="1" data-f="dia"></td>
-            <td><input type="number" value="${r.len}" min="0" step="0.01" data-f="len"></td>
-            <td style="text-align:center"><input type="checkbox" ${r.fix ? "checked" : ""} data-f="fix"></td>
-            <td class="num dcell" data-doneof="${li}:${ri}"></td>
-            <td style="text-align:right"><button class="mini" data-act="delrow">×</button></td>
+            <td class="c-pos" data-label="${esc(t("th.pos"))}"><input type="text" value="${esc(r.pos)}" data-f="pos"></td>
+            <td class="c-qty" data-label="${esc(t("th.qty"))}"><input type="number" value="${r.qty}" min="0" step="1" inputmode="numeric" data-f="qty"></td>
+            <td class="c-dia" data-label="${esc(t("th.dia"))}"><input type="number" value="${r.dia}" min="1" step="1" inputmode="numeric" data-f="dia"></td>
+            <td class="c-len" data-label="${esc(t("th.len"))}"><input type="number" value="${r.len}" min="0" step="0.01" inputmode="decimal" data-f="len"></td>
+            <td class="c-fix" data-label="" style="text-align:center"><label><input type="checkbox" ${r.fix ? "checked" : ""} data-f="fix"><span class="fixlbl">${esc(t("th.fix"))}</span></label></td>
+            <td class="num dcell c-done" data-label="${esc(t("th.done"))}" data-doneof="${li}:${ri}"></td>
+            <td class="c-del" data-label="" style="text-align:right"><button class="mini" data-act="delrow" aria-label="×">×</button></td>
           </tr>`).join("")}
         </tbody>
       </table>
+      </div>
+      <div class="btnbar" style="margin-top:8px">
+        <button class="mini" data-act="addrow">${esc(t("list.addRow"))}</button>
       </div>
     </div>`).join("");
   renderRests();
   renderDiaSettings();
   renderListProgress();
+  updateSummaries();
 }
 
 function renderRests() {
@@ -674,20 +863,40 @@ function renderRests() {
   if (!state.rests) state.rests = [];
   if (!state.rests.length) {
     host.innerHTML = `<p class="small muted" style="margin:0">${esc(t("rest.none"))}</p>`;
+    updateSummaries();
     return;
   }
-  host.innerHTML = `<table class="rowtable">
+  host.innerHTML = `<div class="tbl-scroll"><table class="rowtable rest">
     <thead><tr>
-      <th style="width:22%" class="num">${esc(t("th.dia"))}</th><th style="width:28%" class="num">${esc(t("th.len"))}</th>
-      <th style="width:22%" class="num">${esc(t("th.qty"))}</th><th style="width:20%">${esc(t("th.note"))}</th><th style="width:8%"></th>
+      <th style="width:22%">${esc(t("th.dia"))}</th><th style="width:28%">${esc(t("th.len"))}</th>
+      <th style="width:22%">${esc(t("th.qty"))}</th><th style="width:20%">${esc(t("th.note"))}</th><th style="width:8%"></th>
     </tr></thead>
     <tbody>${state.rests.map((r, i) => `<tr data-rest="${i}">
-      <td><input type="number" value="${r.dia}" min="1" step="1" data-f="dia"></td>
-      <td><input type="number" value="${r.len}" min="0" step="0.01" data-f="len"></td>
-      <td><input type="number" value="${r.qty}" min="0" step="1" data-f="qty"></td>
-      <td><input type="text" value="${esc(r.note || "")}" data-f="note" placeholder="${esc(t("rest.notePh"))}"></td>
-      <td style="text-align:right"><button class="mini" data-act="delrest">×</button></td>
-    </tr>`).join("")}</tbody></table>`;
+      <td class="c-dia" data-label="${esc(t("th.dia"))}"><input type="number" value="${r.dia}" min="1" step="1" inputmode="numeric" data-f="dia"></td>
+      <td class="c-len" data-label="${esc(t("th.len"))}"><input type="number" value="${r.len}" min="0" step="0.01" inputmode="decimal" data-f="len"></td>
+      <td class="c-qty" data-label="${esc(t("th.qty"))}"><input type="number" value="${r.qty}" min="0" step="1" inputmode="numeric" data-f="qty"></td>
+      <td class="c-note" data-label="${esc(t("th.note"))}"><input type="text" value="${esc(r.note || "")}" data-f="note" placeholder="${esc(t("rest.notePh"))}"></td>
+      <td class="c-del" data-label="" style="text-align:right"><button class="mini" data-act="delrest" aria-label="×">×</button></td>
+    </tr>`).join("")}</tbody></table></div>`;
+  updateSummaries();
+}
+
+/* Zusammenfassung in den zugeklappten Abschnitten: was drinsteht, ohne aufzuklappen. */
+function updateSummaries() {
+  const ds = diameters();
+  const mat = $("matSum");
+  if (mat) mat.textContent = t("set.sum", {
+    cap: NF(state.stockDefault, 2), min: NF(state.minRest, 2),
+    dia: ds.length ? ds.join(", ") : ""
+  });
+  const rs = $("restSum");
+  if (rs) {
+    const list = (state.rests || []).filter(r => (+r.dia > 0) && (+r.len > 0) && (+r.qty > 0));
+    const n = list.reduce((s, r) => s + Math.round(+r.qty || 0), 0);
+    rs.textContent = n
+      ? t("rest.sum", { n, len: NF(list.reduce((s, r) => s + (+r.len || 0) * Math.round(+r.qty || 0), 0), 2) })
+      : t("rest.sumNone");
+  }
 }
 
 $("rests").addEventListener("input", e => {
@@ -716,24 +925,25 @@ function diameters() {
 
 function renderDiaSettings() {
   const ds = diameters();
-  if (!ds.length) { $("diaSettings").innerHTML = ""; return; }
+  if (!ds.length) { $("diaSettings").innerHTML = ""; updateSummaries(); return; }
   $("diaSettings").innerHTML = `
     <h3>${esc(t("dia.h"))}</h3>
-    <div class="row" id="diaRow">
+    <div class="dia-grid" id="diaRow">
       ${ds.map(d => {
         const cfg = state.dia[d] || {};
-        return `<div style="border:1px solid var(--line); border-radius:8px; padding:8px 10px" data-dia="${d}">
+        return `<div class="kpi" data-dia="${d}">
           <div style="font-weight:600; margin-bottom:4px">ø ${d} mm</div>
           <label class="f">${esc(t("dia.stock"))}
-            <input type="number" step="0.01" min="0.5" style="width:100px" data-dcfg="stock"
+            <input type="number" step="0.01" min="0.5" style="width:100px" data-dcfg="stock" inputmode="decimal"
                    value="${cfg.stock != null ? cfg.stock : ""}" placeholder="${NF(state.stockDefault, 2)}">
           </label>
-          <label class="small" style="display:flex; gap:6px; align-items:center; margin-top:6px; color:var(--muted)">
+          <label class="small" style="display:flex; gap:8px; align-items:center; margin-top:8px; color:var(--muted)">
             <input type="checkbox" data-dcfg="ring" ${cfg.ring ? "checked" : ""}> ${esc(t("dia.ring"))}
           </label>
         </div>`;
       }).join("")}
     </div>`;
+  updateSummaries();
 }
 
 $("lists").addEventListener("input", e => {
@@ -752,9 +962,23 @@ $("lists").addEventListener("input", e => {
 $("lists").addEventListener("click", e => {
   const act = e.target.dataset.act; if (!act) return;
   const card = e.target.closest("[data-li]"); const li = +card.dataset.li;
-  if (act === "addrow") { state.lists[li].rows.push({ pos: "", qty: 1, dia: 12, len: 1, fix: false }); renderLists(); }
-  if (act === "dellist") { state.lists.splice(li, 1); renderLists(); }
-  if (act === "delrow") { const ri = +e.target.closest("[data-ri]").dataset.ri; state.lists[li].rows.splice(ri, 1); renderLists(); }
+  const L = state.lists[li];
+  if (act === "addrow") {
+    // neue Zeile übernimmt ø und Länge der letzten — meist ändert sich nur die Position
+    const prev = L.rows[L.rows.length - 1] || {};
+    L.rows.push({ pos: "", qty: 1, dia: prev.dia || 12, len: prev.len || 1, fix: false });
+    renderLists();
+    const neu = $("lists").querySelector(`[data-li="${li}"] tbody tr:last-child [data-f="pos"]`);
+    if (neu) neu.focus();
+  }
+  if (act === "dellist") {
+    const n = L.rows.length;
+    if (n > 1 && !confirm(t("list.delAsk", { name: L.name, n }))) return;
+    state.lists.splice(li, 1);
+    renderLists();
+  }
+  if (act === "delrow") { const ri = +e.target.closest("[data-ri]").dataset.ri; L.rows.splice(ri, 1); renderLists(); }
+  markStale();
 });
 
 $("diaSettings").addEventListener("input", e => {
@@ -766,10 +990,10 @@ $("diaSettings").addEventListener("input", e => {
 });
 
 $("stockDefault").addEventListener("input", e => { state.stockDefault = parseFloat(e.target.value.replace(",", ".")) || 12; renderDiaSettings(); });
-$("minRest").addEventListener("input", e => { state.minRest = parseFloat(e.target.value.replace(",", ".")) || 0; });
-$("btnAddList").onclick = () => { state.lists.push({ name: t("list.new"), rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }); renderLists(); };
-$("btnDemo").onclick = () => { state = demoState(); lastResult = null; $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest; renderLists(); $("out").innerHTML = ""; save(); };
-$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, rests: [], done: {}, lists: [{ name: t("list.first"), rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; lastResult = null; renderLists(); $("out").innerHTML = ""; save(); };
+$("minRest").addEventListener("input", e => { state.minRest = parseFloat(e.target.value.replace(",", ".")) || 0; updateSummaries(); });
+$("btnAddList").onclick = () => { state.lists.push({ name: t("list.new"), rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }); renderLists(); markStale(); };
+$("btnDemo").onclick = () => { state = demoState(); resetOutput(); };
+$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, rests: [], done: {}, lists: [{ name: t("list.first"), rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; resetOutput(); };
 $("btnResetDone").onclick = () => {
   const n = Object.keys(state.done || {}).length;
   if (n && !confirm(t("ask.reset", { n }))) return;
@@ -777,6 +1001,89 @@ $("btnResetDone").onclick = () => {
   refreshTicks(); save();
 };
 $("btnPrint").onclick = () => window.print();
+
+/* Eingaben komplett ersetzt: Ausgabe verwerfen und Maske neu zeichnen. */
+function resetOutput() {
+  lastResult = null;
+  $("stockDefault").value = state.stockDefault;
+  $("minRest").value = state.minRest;
+  renderLists();
+  $("out").innerHTML = "";
+  $("resultTools").classList.add("hidden");
+  document.body.classList.remove("hasresult", "stale");
+  save();
+}
+
+/* ---------- Aktionsleiste: rechnen, springen, „Ergebnis veraltet" ----------
+   Der gerechnete Plan gehört zu den Zahlen, mit denen er gerechnet wurde. Ändert
+   jemand danach etwas an der Eingabe, wird die Ausgabe abgeblendet und der Knopf
+   hervorgehoben, statt kommentarlos einen überholten Plan stehen zu lassen. */
+function markStale() {
+  if (!document.body.classList.contains("hasresult")) return;
+  document.body.classList.add("stale");
+  $("abNote").textContent = t("msg.stale");
+  $("abNote").classList.add("stale");
+  $("btnCalc").textContent = t("btn.recalc");
+}
+function clearStale() {
+  document.body.classList.remove("stale");
+  $("abNote").textContent = "";
+  $("abNote").classList.remove("stale");
+}
+["lists", "rests", "diaSettings", "stockDefault", "minRest"].forEach(id => {
+  const el = $(id);
+  el.addEventListener("input", markStale);
+  el.addEventListener("change", markStale);
+});
+$("effort").addEventListener("change", markStale);
+
+/* „identische Stangen zusammenfassen" wirkt nur auf die Darstellung —
+   das lässt sich sofort zeigen, ohne noch einmal zu rechnen. */
+$("groupSame").addEventListener("change", () => {
+  if (lastResult && lastResult.results) render(lastResult.results, lastResult.errors, lastResult.minRest, true);
+});
+
+/* Sprungknopf am Telefon: von der Eingabe zum Plan und wieder zurück. */
+function updateJump() {
+  const btn = $("btnJump");
+  if (!document.body.classList.contains("hasresult")) return;
+  const top = $("out").getBoundingClientRect().top;
+  const inPlan = top < window.innerHeight * 0.4;
+  btn.dataset.dir = inPlan ? "up" : "down";
+  btn.textContent = t(inPlan ? "btn.toInput" : "btn.toPlan");
+}
+$("btnJump").onclick = () => {
+  const up = $("btnJump").dataset.dir === "up";
+  (up ? document.querySelector(".wrap > .panel") : $("out")).scrollIntoView({ behavior: "smooth", block: "start" });
+};
+/* Die feste Leiste darf den letzten Absatz nicht verdecken — ihre tatsächliche
+   Höhe (sie bricht auf schmalen Geräten um) wird als Polster nach unten gemeldet. */
+function fitActionbar() {
+  const ab = document.querySelector(".actionbar");
+  document.documentElement.style.setProperty("--abh", Math.ceil(ab.getBoundingClientRect().height) + "px");
+}
+if (window.ResizeObserver) new ResizeObserver(fitActionbar).observe(document.querySelector(".actionbar"));
+window.addEventListener("resize", fitActionbar);
+fitActionbar();
+
+let jumpTick = false;
+window.addEventListener("scroll", () => {
+  if (jumpTick) return;
+  jumpTick = true;
+  requestAnimationFrame(() => { jumpTick = false; updateJump(); });
+}, { passive: true });
+
+/* Beim Drucken werden alle Klappen geöffnet, damit nichts fehlt, und danach
+   wieder in den Zustand von vorher zurückgesetzt. */
+let printOpened = [];
+window.addEventListener("beforeprint", () => {
+  printOpened = [...document.querySelectorAll("details:not([open])")];
+  printOpened.forEach(d => { d.open = true; });
+});
+window.addEventListener("afterprint", () => {
+  printOpened.forEach(d => { d.open = false; });
+  printOpened = [];
+});
 
 /* „Als Datei speichern": lädt die ausgelieferte Datei erneut und bietet sie zum
    Herunterladen an. Bewusst nicht das laufende DOM serialisiert — das würde die
@@ -1086,6 +1393,10 @@ function colorFor(ix) { return `hsl(${(ix * 47 + 14) % 360} 62% 68%)`; }
 
 function showNoItems() {
   $("out").innerHTML = `<div class="panel"><p class="note bad">${esc(t("err.none"))}</p></div>`;
+  document.body.classList.remove("hasresult");
+  $("resultTools").classList.add("hidden");
+  clearStale();
+  $("btnCalc").textContent = t("btn.calc");
 }
 
 /* Schlüssel für den Erledigt-Haken. Enthält bewusst den Inhalt der Stange:
@@ -1129,6 +1440,9 @@ function refreshTicks() {
     box.innerHTML = `<div class="k">${esc(t("prog.k"))}</div>
       <div class="v"${s.done && s.done === s.n ? ` style="color:var(--ok)"` : ""}>${s.done} / ${s.n}</div>
       <div class="n">${esc(t("prog.n", { p: NF(s.n ? s.done / s.n * 100 : 0, 0) }))}</div>`;
+    // dieselbe Zahl noch einmal in der Aktionsleiste — beim Abhaken am Gerät
+    // steht sie sonst weit oben außer Sicht
+    $("abProg").innerHTML = t("prog.short", { done: s.done, n: s.n, p: NF(s.n ? s.done / s.n * 100 : 0, 0) });
   }
   renderListProgress();
 }
@@ -1189,7 +1503,7 @@ $("out").addEventListener("change", e => {
   refreshTicks(); save();
 });
 
-function render(results, errors, minRest) {
+function render(results, errors, minRest, keepScroll) {
   const out = [];
   tickGroups = [];
 
@@ -1219,16 +1533,16 @@ function render(results, errors, minRest) {
   // Bestellliste
   out.push(`<div class="panel">
     <h3>${esc(t("order.h"))}</h3>
-    <div class="tbl-scroll"><table>
+    <div class="tbl-scroll"><table class="resp">
       <thead><tr><th>ø</th><th class="num">${esc(t("th.stockLen"))}</th><th class="num">${esc(t("th.newBars"))}</th><th class="num">${esc(t("th.totalLen"))}</th><th class="num">${esc(t("th.mass"))}</th><th class="num">${esc(t("th.fromRest"))}</th><th class="num">${esc(t("th.waste"))}</th></tr></thead>
       <tbody>${results.map(R => `<tr>
-        <td><b>ø ${R.g.dia}</b>${R.g.ring ? ` <span class="tag ok">${esc(t("tag.ring"))}</span>` : ""}</td>
-        <td class="num">${NF(m(R.g.cap))} m</td>
-        <td class="num"><b>${NF0(R.barsNew.length)}</b></td>
-        <td class="num">${NF(m(R.totalStock), 1)} m</td>
-        <td class="num">${NF(R.totalStock * R.kgm / 1000, 1)} kg</td>
-        <td class="num">${R.usedFromRest ? `<span style="color:var(--ok)">${NF(m(R.usedFromRest), 2)} m</span> <span class="muted">(${R.barsRest.length})</span>` : `<span class="muted">—</span>`}</td>
-        <td class="num">${NF(m(R.wasteAll), 2)} m · ${NF(R.wasteAll * R.kgm / 1000, 1)} kg
+        <td class="rowhead"><b>ø ${R.g.dia}</b>${R.g.ring ? ` <span class="tag ok">${esc(t("tag.ring"))}</span>` : ""}</td>
+        <td class="num" data-label="${esc(t("th.stockLen"))}">${NF(m(R.g.cap))} m</td>
+        <td class="num" data-label="${esc(t("th.newBars"))}"><b>${NF0(R.barsNew.length)}</b></td>
+        <td class="num" data-label="${esc(t("th.totalLen"))}">${NF(m(R.totalStock), 1)} m</td>
+        <td class="num" data-label="${esc(t("th.mass"))}">${NF(R.totalStock * R.kgm / 1000, 1)} kg</td>
+        <td class="num" data-label="${esc(t("th.fromRest"))}">${R.usedFromRest ? `<span style="color:var(--ok)">${NF(m(R.usedFromRest), 2)} m</span> <span class="muted">(${R.barsRest.length})</span>` : `<span class="muted">—</span>`}</td>
+        <td class="num" data-label="${esc(t("th.waste"))}">${NF(m(R.wasteAll), 2)} m · ${NF(R.wasteAll * R.kgm / 1000, 1)} kg
           <span class="muted">(${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span></td>
       </tr>`).join("")}</tbody>
     </table></div>
@@ -1279,13 +1593,13 @@ function render(results, errors, minRest) {
       const e = pat.get(k); e.n++; e.ids.push(b.id);
     });
     if (pat.size) out.push(`<h3>${esc(t("pat.h"))}</h3>
-      <div class="tbl-scroll"><table>
+      <div class="tbl-scroll"><table class="resp">
         <thead><tr><th class="num">${esc(t("th.count"))}</th><th>${esc(t("pat.per", { cap: NF(m(R.g.cap)) }))}</th><th class="num">${esc(t("th.rest"))}</th><th class="num">${esc(t("th.wasteTotal"))}</th></tr></thead>
         <tbody>${[...pat.values()].sort((a, b) => b.n - a.n).map(e => `<tr>
-          <td class="num"><b>${e.n}×</b></td>
-          <td>${e.lens.map(L => NF(m(L))).join(" + ")}</td>
-          <td class="num">${NF(m(e.rest))} m</td>
-          <td class="num">${NF(m(e.rest * e.n), 2)} m</td>
+          <td class="num" data-label="${esc(t("th.count"))}"><b>${e.n}×</b></td>
+          <td data-label="${esc(t("pat.per", { cap: NF(m(R.g.cap)) }))}">${e.lens.map(L => NF(m(L))).join(" + ")}</td>
+          <td class="num" data-label="${esc(t("th.rest"))}">${NF(m(e.rest))} m</td>
+          <td class="num" data-label="${esc(t("th.wasteTotal"))}">${NF(m(e.rest * e.n), 2)} m</td>
         </tr>`).join("")}</tbody>
       </table></div>`);
 
@@ -1344,7 +1658,7 @@ function render(results, errors, minRest) {
 
     // Zuordnung Position -> Stangen
     out.push(`<h3 style="margin-top:18px">${esc(t("assign.h"))}</h3>
-      <div class="tbl-scroll"><table>
+      <div class="tbl-scroll"><table class="resp">
         <thead><tr><th>${esc(t("th.position"))}</th><th>${esc(t("th.list"))}</th><th class="num">${esc(t("th.length"))}</th><th class="num">${esc(t("th.qty"))}</th><th>${esc(t("th.cutFrom"))}</th></tr></thead>
         <tbody>${R.cut.map(it => {
           const src = new Map();
@@ -1361,11 +1675,12 @@ function render(results, errors, minRest) {
             ? `${r.from}<span class="muted">&nbsp;${esc(t("assign.times", { n: r.n }))}</span>`
             : `<b>${r.from} – ${r.to}</b><span class="muted">&nbsp;${esc(t("assign.each", { n: r.n }))}</span>`).join(", ");
           return `<tr>
-            <td><span class="chip" style="background:${colorFor(ix.get(it.key))}; color:#10131a; border:none">${esc(it.label)}</span></td>
-            <td class="small muted">${esc(t("assign.posOf", { list: it.list, pos: it.pos }))}</td>
-            <td class="num">${NF(it.lenM)} m</td>
-            <td class="num">${it.qty}</td>
-            <td class="small">${srcTxt}</td>
+            <td class="rowhead"><span class="chip" style="background:${colorFor(ix.get(it.key))}; color:#10131a; border:none">${esc(it.label)}</span>
+              <span class="small muted only-mob">${esc(t("assign.posOf", { list: it.list, pos: it.pos }))}</span></td>
+            <td class="small muted hide-mob" data-label="${esc(t("th.list"))}">${esc(t("assign.posOf", { list: it.list, pos: it.pos }))}</td>
+            <td class="num" data-label="${esc(t("th.length"))}">${NF(it.lenM)} m</td>
+            <td class="num" data-label="${esc(t("th.qty"))}">${it.qty}</td>
+            <td class="small wide" data-label="${esc(t("th.cutFrom"))}">${srcTxt}</td>
           </tr>`;
         }).join("")}</tbody>
       </table></div>`);
@@ -1382,8 +1697,13 @@ function render(results, errors, minRest) {
   // Verschnittverursacher
   out.push(renderWasteRanking(results));
   $("out").innerHTML = out.join("");
+  document.body.classList.add("hasresult");
+  $("resultTools").classList.remove("hidden");
+  clearStale();
+  $("btnCalc").textContent = t("btn.calc");
   refreshTicks();
-  $("out").scrollIntoView({ behavior: "smooth", block: "start" });
+  updateJump();
+  if (!keepScroll) $("out").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderWasteRanking(results) {
@@ -1427,7 +1747,7 @@ function renderWasteRanking(results) {
   return `<div class="panel">
     <h2>${esc(t("wa.h"))}</h2>
     ${rec}
-    <div class="tbl-scroll"><table>
+    <div class="tbl-scroll"><table class="resp">
       <thead><tr>
         <th>${esc(t("th.position"))}</th><th class="num">ø</th><th class="num">${esc(t("th.qtyLen"))}</th>
         <th class="num">${esc(t("th.marginal"))}</th><th class="num">${esc(t("th.alone"))}</th>
@@ -1439,13 +1759,14 @@ function renderWasteRanking(results) {
         const cls = w ? "bad" : a.marginal > 0 ? "warn" : "ok";
         const txt = t(w ? "tag.orderFix" : a.marginal > 0 ? "tag.cutSelf" : "tag.filler");
         return `<tr>
-          <td><b>${esc(a.it.label)}</b> <span class="small muted">${esc(a.it.list)}</span></td>
-          <td class="num">${a.it.dia}</td>
-          <td class="num">${a.it.qty} × ${NF(a.it.lenM)} m</td>
-          <td class="num">${marg > 0 ? "+" : ""}${NF(marg, 2)} m<br><span class="small muted">${margKg > 0 ? "+" : ""}${NF(margKg, 1)} kg</span></td>
-          <td class="num">${NF(m(a.wasteAlone), 2)} m<br><span class="small muted">${NF(a.wasteAloneRatio * 100, 1)} %</span></td>
-          <td class="num">${a.perBar}</td>
-          <td><span class="tag ${cls}">${esc(txt)}</span></td>
+          <td class="rowhead"><b>${esc(a.it.label)}</b> <span class="small muted">${esc(a.it.list)}</span>
+            <span class="only-mob">· ø ${a.it.dia} · ${a.it.qty} × ${NF(a.it.lenM)} m</span></td>
+          <td class="num hide-mob" data-label="ø">${a.it.dia}</td>
+          <td class="num hide-mob" data-label="${esc(t("th.qtyLen"))}">${a.it.qty} × ${NF(a.it.lenM)} m</td>
+          <td class="num" data-label="${esc(t("th.marginal"))}">${marg > 0 ? "+" : ""}${NF(marg, 2)} m<br><span class="small muted">${margKg > 0 ? "+" : ""}${NF(margKg, 1)} kg</span></td>
+          <td class="num" data-label="${esc(t("th.alone"))}">${NF(m(a.wasteAlone), 2)} m<br><span class="small muted">${NF(a.wasteAloneRatio * 100, 1)} %</span></td>
+          <td class="num" data-label="${esc(t("th.perBar"))}">${a.perBar}</td>
+          <td data-label="${esc(t("th.rating"))}"><span class="tag ${cls}">${esc(txt)}</span></td>
         </tr>`;
       }).join("")}</tbody>
     </table></div>
@@ -1483,7 +1804,8 @@ function setLang(lang, initial) {
   if (initial) return;
   renderLists();
   if (lastResult && lastResult.empty) showNoItems();
-  else if (lastResult) render(lastResult.results, lastResult.errors, lastResult.minRest);
+  else if (lastResult) render(lastResult.results, lastResult.errors, lastResult.minRest, true);
+  updateJump();
 }
 
 $("langsw").addEventListener("click", e => {
@@ -1504,4 +1826,12 @@ if (loadStored()) {
 if (!state.done) state.done = {};
 setLang(LANG, true);
 renderLists();
+
+/* Am Telefon steht zuerst die Stückliste. Material und Reststangen bleiben
+   zugeklappt — die Zusammenfassung in der Kopfzeile zeigt, was drinsteht.
+   Reststangen klappen auf, sobald welche erfasst sind. */
+const AM_TELEFON = window.matchMedia("(max-width:760px)").matches;
+if (AM_TELEFON) $("secMaterial").open = false;
+else if ((state.rests || []).length) $("secRests").open = true;
+updateJump();
 </script>
