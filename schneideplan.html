@@ -124,6 +124,15 @@
   .grp-title .d{font-size:19px; font-weight:600}
   hr{border:none; border-top:1px solid var(--line); margin:18px 0}
 
+  /* Sprachumschalter / language switch */
+  .topbar{display:flex; justify-content:flex-end; align-items:center; gap:8px; margin:0 0 12px}
+  .langsw{display:inline-flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:var(--panel)}
+  .langsw button{border:none; border-radius:0; background:transparent; color:var(--muted); padding:5px 14px; font-size:13px}
+  .langsw button + button{border-left:1px solid var(--line)}
+  .langsw button:hover{color:var(--ink)}
+  .langsw button[aria-pressed="true"]{background:var(--accent); color:#fff; font-weight:600}
+  .langsw button[aria-pressed="true"]:hover{color:#fff}
+
   @media print{
     body{background:#fff}
     .no-print{display:none !important}
@@ -135,70 +144,66 @@
 </style>
 
 <div class="wrap">
-  <h1>Schneideplan Betoneisen</h1>
-  <p class="sub">
-    Verschnittoptimierte Aufteilung von Stabpositionen auf Lagerstangen (1D-Zuschnittproblem).
-    Schnittbreite wird ignoriert. Jedes geschnittene Stück bleibt seiner Position zugeordnet.
-  </p>
+  <div class="topbar no-print">
+    <span class="small muted" data-i18n="lang.label"></span>
+    <div class="langsw" id="langsw" role="group" aria-label="Sprache / Language">
+      <button type="button" data-lang="de" aria-pressed="true">Deutsch</button>
+      <button type="button" data-lang="en" aria-pressed="false">English</button>
+    </div>
+  </div>
+
+  <h1 data-i18n="app.title"></h1>
+  <p class="sub" data-i18n="app.sub"></p>
 
   <div class="panel no-print">
-    <h2>1 · Einstellungen</h2>
+    <h2 data-i18n="set.h"></h2>
     <div class="row">
-      <label class="f">Lagerlänge Standard [m]
+      <label class="f"><span data-i18n="set.stockDefault"></span>
         <input type="number" id="stockDefault" value="7" step="0.01" min="0.5" style="width:110px">
       </label>
-      <label class="f">Mind. verwertbares Reststück [m]
+      <label class="f"><span data-i18n="set.minRest"></span>
         <input type="number" id="minRest" value="1.00" step="0.05" min="0" style="width:130px">
       </label>
       <label class="f" style="justify-content:flex-end">&nbsp;
         <span class="small" style="display:flex; gap:6px; align-items:center; padding-bottom:7px; color:var(--ink)">
-          <input type="checkbox" id="groupSame" checked> identische Stangen zusammenfassen
+          <input type="checkbox" id="groupSame" checked> <span data-i18n="set.groupSame"></span>
         </span>
       </label>
-      <label class="f">Rechenaufwand
+      <label class="f"><span data-i18n="set.effort"></span>
         <select id="effort">
-          <option value="1">schnell</option>
-          <option value="2" selected>normal</option>
-          <option value="3">gründlich</option>
+          <option value="1" data-i18n="set.effort1"></option>
+          <option value="2" selected data-i18n="set.effort2"></option>
+          <option value="3" data-i18n="set.effort3"></option>
         </select>
       </label>
-      <button class="primary" id="btnCalc">Schneideplan berechnen</button>
-      <button id="btnPrint">Drucken / PDF</button>
-      <button id="btnResetDone">Haken zurücksetzen</button>
+      <button class="primary" id="btnCalc" data-i18n="btn.calc"></button>
+      <button id="btnPrint" data-i18n="btn.print"></button>
+      <button id="btnResetDone" data-i18n="btn.resetDone"></button>
     </div>
     <div id="diaSettings" style="margin-top:12px"></div>
   </div>
 
   <div class="panel no-print">
-    <h2>2 · Vorhandene Reststangen <span class="muted" style="font-weight:400; font-size:14px">(optional)</span></h2>
-    <p class="small muted" style="margin:-6px 0 10px">
-      Verwertbare Reste aus früheren Schnitten, die noch am Lager liegen. Sie werden nur dann herangezogen,
-      wenn dadurch tatsächlich neue Stangen eingespart werden — sonst bleiben sie unangetastet im Lager.
-      Was nach dem Schnitt von einer Reststange übrig bleibt, wird wieder als Rest ausgewiesen.
-    </p>
+    <h2><span data-i18n="rest.h"></span> <span class="muted" style="font-weight:400; font-size:14px">(optional)</span></h2>
+    <p class="small muted" style="margin:-6px 0 10px" data-i18n="rest.intro"></p>
     <div class="tbl-scroll" id="rests"></div>
     <div class="btnbar" style="margin-top:10px">
-      <button id="btnAddRest">+ Reststange</button>
+      <button id="btnAddRest" data-i18n="rest.add"></button>
     </div>
   </div>
 
   <div class="panel no-print">
-    <h2>3 · Stücklisten</h2>
+    <h2 data-i18n="lists.h"></h2>
     <div id="lists"></div>
     <div class="btnbar" style="margin-top:10px">
-      <button id="btnAddList">+ Stückliste</button>
-      <button id="btnDemo">Beispieldaten laden</button>
-      <button id="btnClear">Alles leeren</button>
-      <button id="btnExport">Export JSON</button>
-      <button id="btnImport">Import JSON</button>
+      <button id="btnAddList" data-i18n="lists.add"></button>
+      <button id="btnDemo" data-i18n="lists.demo"></button>
+      <button id="btnClear" data-i18n="lists.clear"></button>
+      <button id="btnExport" data-i18n="lists.export"></button>
+      <button id="btnImport" data-i18n="lists.import"></button>
       <input type="file" id="fileImport" accept=".json,application/json" class="hidden">
     </div>
-    <p class="small muted" style="margin:10px 0 0">
-      Spalte <b>fix</b> = Position wird in Fixlänge ab Werk bestellt und nicht selbst geschnitten
-      (fällt aus dem Schneideplan heraus, Verschnitt = 0).
-      Spalte <b>Ring</b> in den Durchmesser-Einstellungen = Material kommt vom Ring (gerichteter Betonstahl),
-      dann entsteht beim Ablängen ebenfalls kein Verschnitt.
-    </p>
+    <p class="small muted" style="margin:10px 0 0" data-i18n-html="lists.foot"></p>
   </div>
 
   <div id="out"></div>
@@ -207,42 +212,351 @@
 <script>
 "use strict";
 
+/* ---------- Sprache / language ----------
+   Alle sichtbaren Texte stehen in I18N. Deutsch ist die Standardsprache,
+   die Wahl wird im Browser gespeichert.
+   All visible text lives in I18N. German is the default language,
+   the choice is stored in the browser. */
+const LS_LANG = "schneideplan.lang";
+let LANG = "de";
+
+const I18N = {
+  de: {
+    "lang.label": "Sprache",
+    "html.title": "Schneideplan Betoneisen",
+    "app.title": "Schneideplan Betoneisen",
+    "app.sub": "Verschnittoptimierte Aufteilung von Stabpositionen auf Lagerstangen (1D-Zuschnittproblem). Schnittbreite wird ignoriert. Jedes geschnittene Stück bleibt seiner Position zugeordnet.",
+
+    "set.h": "1 · Einstellungen",
+    "set.stockDefault": "Lagerlänge Standard [m]",
+    "set.minRest": "Mind. verwertbares Reststück [m]",
+    "set.groupSame": "identische Stangen zusammenfassen",
+    "set.effort": "Rechenaufwand",
+    "set.effort1": "schnell",
+    "set.effort2": "normal",
+    "set.effort3": "gründlich",
+    "btn.calc": "Schneideplan berechnen",
+    "btn.calcBusy": "rechnet …",
+    "btn.print": "Drucken / PDF",
+    "btn.resetDone": "Haken zurücksetzen",
+
+    "dia.h": "Material je Durchmesser",
+    "dia.stock": "Lagerlänge [m]",
+    "dia.ring": "aus Ring (kein Verschnitt)",
+
+    "rest.h": "2 · Vorhandene Reststangen",
+    "rest.intro": "Verwertbare Reste aus früheren Schnitten, die noch am Lager liegen. Sie werden nur dann herangezogen, wenn dadurch tatsächlich neue Stangen eingespart werden — sonst bleiben sie unangetastet im Lager. Was nach dem Schnitt von einer Reststange übrig bleibt, wird wieder als Rest ausgewiesen.",
+    "rest.none": "Keine Reststangen erfasst — es wird ausschließlich von neuen Lagerstangen geschnitten.",
+    "rest.add": "+ Reststange",
+    "rest.notePh": "Lagerplatz …",
+
+    "lists.h": "3 · Stücklisten",
+    "lists.add": "+ Stückliste",
+    "lists.demo": "Beispieldaten laden",
+    "lists.clear": "Alles leeren",
+    "lists.export": "Export JSON",
+    "lists.import": "Import JSON",
+    "lists.foot": "Spalte <b>fix</b> = Position wird in Fixlänge ab Werk bestellt und nicht selbst geschnitten (fällt aus dem Schneideplan heraus, Verschnitt = 0). Spalte <b>Ring</b> in den Durchmesser-Einstellungen = Material kommt vom Ring (gerichteter Betonstahl), dann entsteht beim Ablängen ebenfalls kein Verschnitt.",
+    "list.namePh": "Bezeichnung der Stückliste",
+    "list.addRow": "+ Zeile",
+    "list.del": "Liste löschen",
+    "list.new": "Neue Stückliste",
+    "list.first": "Stückliste 1",
+
+    "th.pos": "Pos.",
+    "th.qty": "Stück",
+    "th.dia": "ø [mm]",
+    "th.len": "Länge [m]",
+    "th.fix": "fix",
+    "th.note": "Bemerkung",
+
+    "demo.list1": "Platte",
+    "demo.list2": "Unterzug",
+    "demo.pos1": "UZ1",
+    "demo.pos2": "UZ2",
+    "demo.restNote": "Lager",
+
+    "msg.restored": v => `Eingaben aus dem Browser-Speicher dieses Geräts wiederhergestellt${v.n ? `, inklusive <b>${v.n} gesetzter Haken</b>` : ""}. Über <b>Beispieldaten laden</b> oder <b>Alles leeren</b> neu anfangen.`,
+    "msg.imported": v => `Daten geladen — ${v.n} gesetzte Haken übernommen.\nNach dem Neuberechnen erscheinen sie wieder im Schneideplan.`,
+    "msg.readFail": "Datei konnte nicht gelesen werden.",
+    "ask.reset": v => `${v.n} gesetzte Haken zurücksetzen?`,
+    "err.none": "Keine gültigen Positionen erfasst.",
+    "err.tooLong": v => `${v.label}: Einzellänge ${v.len} m > Lagerlänge ${v.cap} m — Stoß erforderlich oder Fixlänge bestellen.`,
+
+    "res.h": "Ergebnis — Gesamtübersicht",
+    "res.notes": "Hinweise:",
+    "kpi.bars.k": "Neue Lagerstangen",
+    "kpi.bars.n": "zu bestellen, über alle ø",
+    "unit.pcs": "Stk",
+    "kpi.mat.k": "Materialeinsatz neu",
+    "kpi.mat.n": v => `Bedarf netto ${v.kg} kg`,
+    "kpi.waste.k": "Verschnitt",
+    "kpi.waste.n": v => `${v.p} % vom Neumaterial`,
+    "kpi.rest.k": "Aus Reststangen gedeckt",
+    "kpi.rest.n": v => `${v.n} Reststange${v.n > 1 ? "n" : ""} angebrochen`,
+    "kpi.fix.k": "Fixlängen / Ring",
+    "kpi.fix.n": "ohne Schneideverschnitt",
+    "prog.k": "Fortschritt Zuschnitt",
+    "prog.n": v => `Stangen abgehakt · ${v.p} %`,
+    "prog.bars": v => `<b>${v.done}</b> / ${v.n} Stangen geschnitten`,
+
+    "order.h": "Bestellung Lagerstangen",
+    "th.stockLen": "Lagerlänge",
+    "th.newBars": "neue Stangen",
+    "th.totalLen": "Gesamtlänge",
+    "th.mass": "Masse",
+    "th.fromRest": "aus Reststangen",
+    "th.waste": "Verschnitt",
+    "tag.ring": "Ring",
+
+    "grp.meta": v => `Lagerlänge ${v.cap} m · ${v.nNew} neue Stangen${v.nRest ? ` + ${v.nRest} Reststangen` : ""} · Verschnitt ${v.waste} m (${v.p} %)`,
+    "tag.optimal": "optimal — Materialschranke erreicht",
+    "tag.lower": v => `rechn. Untergrenze ${v.n} Stangen (durch die Längenkombination nicht immer erreichbar)`,
+    "grp.notInPlan": "Nicht im Schneideplan (Fixlänge/Ring/zu lang):",
+    "rest.balance": v => `<b>Reststangen:</b> ${v.have} vorhanden (${v.haveLen} m) · ${v.used
+      ? `<b>${v.used} angebrochen</b>, daraus ${v.usedLen} m zu Stäben zugeschnitten (spart ${v.savedKg} kg Neumaterial), ${v.leftover} m bleiben als neuer Rest`
+      : `keine eingesetzt — sie würden hier keine neue Stange einsparen und bleiben unangetastet am Lager`}${v.free ? ` · unberührt: ${v.free}` : ""}`,
+
+    "pat.h": "Schnittmuster — Übersicht (neue Stangen)",
+    "th.count": "Anzahl",
+    "pat.per": v => `Schnittmuster je ${v.cap} m Stange`,
+    "th.rest": "Rest",
+    "th.wasteTotal": "Verschnitt gesamt",
+
+    "plan.h": "Schneideplan — Stange für Stange",
+    "plan.grouped": v => `(${v.bars} Stangen in ${v.groups} identischen Gruppen)`,
+    "bar.nBars": v => `${v.n}× Stangen`,
+    "bar.used": v => `genutzt ${v.x} m`,
+    "bar.rest": v => `Rest ${v.x} m`,
+    "bar.usable": " ↺ verwertbar",
+    "bar.totalRest": v => ` (gesamt ${v.x} m)`,
+    "bar.perBar": "(je Stange)",
+    "bar.done": "erledigt",
+    "bar.appliesAll": v => `gilt für alle ${v.n} Stangen dieses Musters`,
+    "tag.restBar": "Reststange",
+    "seg.rest": "Rest",
+
+    "assign.h": "Zuordnung der Stücke zu den Positionen",
+    "th.position": "Position",
+    "th.list": "Stückliste",
+    "th.length": "Länge",
+    "th.cutFrom": "geschnitten aus Stange",
+    "assign.posOf": v => `${v.list} · Pos. ${v.pos}`,
+    "assign.times": v => `(${v.n}×)`,
+    "assign.each": v => `(je ${v.n}×)`,
+    "usable.summary": v => `${v.n} verwertbare Reststücke ≥ ${v.x} m`,
+
+    "wa.h": "Verschnitt-Analyse je Position",
+    "wa.noCand": v => `Kein Kandidat für eine Fixlängen-Bestellung: der größte Verschnitttreiber ist <b>${v.label}</b> (${v.qty}× ${v.len} m, ø ${v.dia}) mit nur <b>${v.marg} m</b> Mehrverschnitt (${v.kg} kg) — das ist weniger als eine Lagerstange. Alle Positionen selbst schneiden.`,
+    "wa.none": "Keine Position verursacht rechnerisch zusätzlichen Verschnitt — die Längen lassen sich untereinander gut kombinieren. Selbst schneiden ist hier durchwegs günstiger als Fixlängen zu bestellen.",
+    "wa.rec": v => `<b>Empfehlung:</b> Position <b>${v.label}</b> (ø ${v.dia}, ${v.qty}× ${v.len} m, ${v.list}) ist der mit Abstand größte Verschnitttreiber: sie erhöht den Verschnitt um <b>${v.marg} m</b> = <b>${v.kg} kg</b> — das entspricht ${v.bars} Lagerstangen, die als reiner Abfall gekauft werden. Grund: aus ${v.cap} m ${v.perBar === 1 ? "geht nur 1 Stück" : `gehen nur ${v.perBar} Stück`} à ${v.len} m, der verbleibende Rest lässt sich mit den übrigen Längen kaum füllen. <b>Diese Position in Fixlänge ${v.len} m ab Werk bestellen</b> — dann entfällt der Anteil vollständig.`,
+    "wa.recOthers": v => `<br>Ebenfalls über der Schwelle einer ganzen Lagerstange und damit prüfenswert: ${v.list}. Alle Kandidaten zusammen ergeben ${v.kg} kg vermeidbaren Verschnitt.`,
+    "wa.recNoOthers": "<br>Alle übrigen Positionen lassen sich gut kombinieren und bleiben Schnittware.",
+    "wa.recHint": "<br><span class=\"small\">Zum Nachrechnen: Häkchen <b>fix</b> bei der Position setzen und neu berechnen.</span>",
+    "th.marginal": "Grenz-Verschnitt",
+    "th.alone": "alleine geschnitten",
+    "th.perBar": "Stk/Stange",
+    "th.rating": "Bewertung",
+    "th.qtyLen": "Stück × Länge",
+    "tag.orderFix": "Fixlänge bestellen",
+    "tag.cutSelf": "selbst schneiden",
+    "tag.filler": "Füller — reduziert Verschnitt",
+    "wa.foot": "<b>Grenz-Verschnitt</b> = Mehrverschnitt, den diese Position im Gesamtplan verursacht (Plan mit dieser Position minus Plan ohne sie). Das ist das entscheidende Kriterium: nur dieser Anteil lässt sich durch eine Fixlängen-Bestellung tatsächlich einsparen. Ein <b>negativer</b> Wert heißt: die Position füllt die Reste der anderen Positionen auf und senkt den Gesamtverschnitt. Als Fixlänge empfohlen wird erst, was mindestens eine ganze Lagerstange an Verschnitt verursacht. <b>Alleine geschnitten</b> zeigt den Verschnitt, wenn die Position ohne Kombination mit anderen Längen aus der Lagerstange geschnitten würde — hohe Werte hier bei gleichzeitig niedrigem Grenz-Verschnitt bedeuten: die Position wird von anderen Positionen „aufgefangen“ und ist unkritisch."
+  },
+
+  en: {
+    "lang.label": "Language",
+    "html.title": "Rebar Cutting Plan",
+    "app.title": "Rebar Cutting Plan",
+    "app.sub": "Waste-optimised allocation of bar positions to stock bars (1D cutting-stock problem). Kerf width is ignored. Every cut piece stays assigned to its position.",
+
+    "set.h": "1 · Settings",
+    "set.stockDefault": "Default stock length [m]",
+    "set.minRest": "Min. usable offcut [m]",
+    "set.groupSame": "group identical bars",
+    "set.effort": "Computing effort",
+    "set.effort1": "fast",
+    "set.effort2": "normal",
+    "set.effort3": "thorough",
+    "btn.calc": "Calculate cutting plan",
+    "btn.calcBusy": "calculating …",
+    "btn.print": "Print / PDF",
+    "btn.resetDone": "Reset check marks",
+
+    "dia.h": "Material per diameter",
+    "dia.stock": "Stock length [m]",
+    "dia.ring": "from coil (no waste)",
+
+    "rest.h": "2 · Remnant bars in stock",
+    "rest.intro": "Usable remnants from earlier cuts that are still in the store. They are only used if doing so actually saves a new bar — otherwise they stay untouched in the store. Whatever is left of a remnant bar after cutting is reported as an offcut again.",
+    "rest.none": "No remnant bars entered — everything is cut from new stock bars.",
+    "rest.add": "+ Remnant bar",
+    "rest.notePh": "Storage location …",
+
+    "lists.h": "3 · Bar lists",
+    "lists.add": "+ Bar list",
+    "lists.demo": "Load sample data",
+    "lists.clear": "Clear all",
+    "lists.export": "Export JSON",
+    "lists.import": "Import JSON",
+    "lists.foot": "Column <b>fixed</b> = the position is ordered as a fixed length from the mill and not cut in-house (it drops out of the cutting plan, waste = 0). Column <b>Coil</b> in the diameter settings = the material comes from a coil (straightened rebar), so cutting to length produces no waste either.",
+    "list.namePh": "Name of the bar list",
+    "list.addRow": "+ Row",
+    "list.del": "Delete list",
+    "list.new": "New bar list",
+    "list.first": "Bar list 1",
+
+    "th.pos": "Pos.",
+    "th.qty": "Qty",
+    "th.dia": "ø [mm]",
+    "th.len": "Length [m]",
+    "th.fix": "fixed",
+    "th.note": "Note",
+
+    "demo.list1": "Slab",
+    "demo.list2": "Beam",
+    "demo.pos1": "B1",
+    "demo.pos2": "B2",
+    "demo.restNote": "Store",
+
+    "msg.restored": v => `Inputs restored from this device's browser storage${v.n ? `, including <b>${v.n} check marks</b>` : ""}. Use <b>Load sample data</b> or <b>Clear all</b> to start over.`,
+    "msg.imported": v => `Data loaded — ${v.n} check marks carried over.\nThey reappear in the cutting plan after recalculating.`,
+    "msg.readFail": "The file could not be read.",
+    "ask.reset": v => `Reset ${v.n} check marks?`,
+    "err.none": "No valid positions entered.",
+    "err.tooLong": v => `${v.label}: single length ${v.len} m > stock length ${v.cap} m — lap splice required, or order as a fixed length.`,
+
+    "res.h": "Result — overview",
+    "res.notes": "Notes:",
+    "kpi.bars.k": "New stock bars",
+    "kpi.bars.n": "to order, across all ø",
+    "unit.pcs": "pcs",
+    "kpi.mat.k": "New material used",
+    "kpi.mat.n": v => `net requirement ${v.kg} kg`,
+    "kpi.waste.k": "Waste",
+    "kpi.waste.n": v => `${v.p} % of the new material`,
+    "kpi.rest.k": "Covered from remnants",
+    "kpi.rest.n": v => `${v.n} remnant bar${v.n > 1 ? "s" : ""} started`,
+    "kpi.fix.k": "Fixed lengths / coil",
+    "kpi.fix.n": "no cutting waste",
+    "prog.k": "Cutting progress",
+    "prog.n": v => `bars checked off · ${v.p} %`,
+    "prog.bars": v => `<b>${v.done}</b> / ${v.n} bars cut`,
+
+    "order.h": "Stock bar order",
+    "th.stockLen": "Stock length",
+    "th.newBars": "new bars",
+    "th.totalLen": "Total length",
+    "th.mass": "Mass",
+    "th.fromRest": "from remnants",
+    "th.waste": "Waste",
+    "tag.ring": "Coil",
+
+    "grp.meta": v => `Stock length ${v.cap} m · ${v.nNew} new bars${v.nRest ? ` + ${v.nRest} remnant bars` : ""} · waste ${v.waste} m (${v.p} %)`,
+    "tag.optimal": "optimal — material bound reached",
+    "tag.lower": v => `theoretical minimum ${v.n} bars (not always reachable with this mix of lengths)`,
+    "grp.notInPlan": "Not in the cutting plan (fixed length / coil / too long):",
+    "rest.balance": v => `<b>Remnant bars:</b> ${v.have} in stock (${v.haveLen} m) · ${v.used
+      ? `<b>${v.used} started</b>, ${v.usedLen} m of it cut into bars (saves ${v.savedKg} kg of new material), ${v.leftover} m remain as a new offcut`
+      : `none used — they would not save a new bar here and stay untouched in the store`}${v.free ? ` · untouched: ${v.free}` : ""}`,
+
+    "pat.h": "Cutting patterns — overview (new bars)",
+    "th.count": "Count",
+    "pat.per": v => `Cutting pattern per ${v.cap} m bar`,
+    "th.rest": "Offcut",
+    "th.wasteTotal": "Total waste",
+
+    "plan.h": "Cutting plan — bar by bar",
+    "plan.grouped": v => `(${v.bars} bars in ${v.groups} identical groups)`,
+    "bar.nBars": v => `${v.n}× bars`,
+    "bar.used": v => `used ${v.x} m`,
+    "bar.rest": v => `offcut ${v.x} m`,
+    "bar.usable": " ↺ usable",
+    "bar.totalRest": v => ` (${v.x} m in total)`,
+    "bar.perBar": "(per bar)",
+    "bar.done": "done",
+    "bar.appliesAll": v => `applies to all ${v.n} bars of this pattern`,
+    "tag.restBar": "Remnant bar",
+    "seg.rest": "Offcut",
+
+    "assign.h": "Pieces assigned to their positions",
+    "th.position": "Position",
+    "th.list": "Bar list",
+    "th.length": "Length",
+    "th.cutFrom": "cut from bar",
+    "assign.posOf": v => `${v.list} · pos. ${v.pos}`,
+    "assign.times": v => `(${v.n}×)`,
+    "assign.each": v => `(${v.n}× each)`,
+    "usable.summary": v => `${v.n} usable offcuts ≥ ${v.x} m`,
+
+    "wa.h": "Waste analysis per position",
+    "wa.noCand": v => `No candidate for a fixed-length order: the biggest waste driver is <b>${v.label}</b> (${v.qty}× ${v.len} m, ø ${v.dia}) with only <b>${v.marg} m</b> of extra waste (${v.kg} kg) — less than a single stock bar. Cut every position in-house.`,
+    "wa.none": "No position causes additional waste by calculation — the lengths combine well with one another. Cutting in-house is cheaper here throughout than ordering fixed lengths.",
+    "wa.rec": v => `<b>Recommendation:</b> position <b>${v.label}</b> (ø ${v.dia}, ${v.qty}× ${v.len} m, ${v.list}) is by far the biggest waste driver: it increases waste by <b>${v.marg} m</b> = <b>${v.kg} kg</b> — the equivalent of ${v.bars} stock bars bought as pure scrap. Reason: ${v.perBar === 1 ? "only 1 piece fits" : `only ${v.perBar} pieces fit`} of ${v.len} m into ${v.cap} m, and the remainder can hardly be filled with the other lengths. <b>Order this position as a fixed length of ${v.len} m from the mill</b> — that removes this share entirely.`,
+    "wa.recOthers": v => `<br>Also above the threshold of one full stock bar and therefore worth checking: ${v.list}. All candidates together add up to ${v.kg} kg of avoidable waste.`,
+    "wa.recNoOthers": "<br>All remaining positions combine well and stay in-house cutting work.",
+    "wa.recHint": "<br><span class=\"small\">To check the effect: tick <b>fixed</b> on the position and recalculate.</span>",
+    "th.marginal": "Marginal waste",
+    "th.alone": "cut on its own",
+    "th.perBar": "pcs/bar",
+    "th.rating": "Assessment",
+    "th.qtyLen": "Qty × length",
+    "tag.orderFix": "order fixed length",
+    "tag.cutSelf": "cut in-house",
+    "tag.filler": "filler — reduces waste",
+    "wa.foot": "<b>Marginal waste</b> = the extra waste this position causes in the overall plan (plan with this position minus plan without it). This is the decisive criterion: only this share can actually be saved by ordering a fixed length. A <b>negative</b> value means the position fills up the offcuts of the other positions and lowers total waste. A fixed length is only recommended once a position causes at least one full stock bar of waste. <b>Cut on its own</b> shows the waste if the position were cut from the stock bar without combining it with other lengths — high values here together with low marginal waste mean the position is “caught” by the other positions and is uncritical."
+  }
+};
+
+function t(key, vars) {
+  const dict = I18N[LANG] || I18N.de;
+  let s = dict[key];
+  if (s == null) s = I18N.de[key];
+  if (s == null) return key;
+  return typeof s === "function" ? s(vars || {}) : s;
+}
+
 /* ---------- Hilfsfunktionen ---------- */
-const NF = (n, d = 2) => (isFinite(n) ? n : 0).toLocaleString("de-AT", { minimumFractionDigits: d, maximumFractionDigits: d });
-const NF0 = n => Math.round(n).toLocaleString("de-AT");
+const LOCALE = () => (LANG === "en" ? "en-GB" : "de-AT");
+const NF = (n, d = 2) => (isFinite(n) ? n : 0).toLocaleString(LOCALE(), { minimumFractionDigits: d, maximumFractionDigits: d });
+const NF0 = n => Math.round(n).toLocaleString(LOCALE());
 const kgPerM = d => 0.006165 * d * d;           // Betonstahl: 7850 kg/m³
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const mm = m => Math.round(m * 1000);
 const m = x => x / 1000;
 
 /* ---------- Zustand ---------- */
-const DEMO = {
-  stockDefault: 7, minRest: 1.0,
-  dia: {}, done: {},
-  // Minimalbeispiel zum Überschreiben mit den eigenen Zahlen.
-  // Zeigt bewusst alle Bausteine: zwei Stücklisten, zwei Durchmesser,
-  // eine vorhandene Reststange und eine Position mit hohem Verschnitt.
-  rests: [{ dia: 12, len: 5.00, qty: 1, note: "Lager" }],
-  lists: [
-    {
-      name: "Platte",
-      rows: [
-        { pos: "1", qty: 12, dia: 12, len: 4.00, fix: false },
-        { pos: "2", qty: 12, dia: 12, len: 3.00, fix: false },
-        { pos: "3", qty: 20, dia: 8, len: 2.50, fix: false }
-      ]
-    },
-    {
-      name: "Unterzug",
-      rows: [
-        { pos: "UZ1", qty: 4, dia: 12, len: 3.50, fix: false },
-        { pos: "UZ2", qty: 6, dia: 12, len: 2.45, fix: false }
-      ]
-    }
-  ]
-};
+// Minimalbeispiel zum Überschreiben mit den eigenen Zahlen.
+// Zeigt bewusst alle Bausteine: zwei Stücklisten, zwei Durchmesser,
+// eine vorhandene Reststange und eine Position mit hohem Verschnitt.
+// Die Bezeichnungen kommen aus der aktuellen Sprache.
+function demoState() {
+  return {
+    stockDefault: 7, minRest: 1.0,
+    dia: {}, done: {},
+    rests: [{ dia: 12, len: 5.00, qty: 1, note: t("demo.restNote") }],
+    lists: [
+      {
+        name: t("demo.list1"),
+        rows: [
+          { pos: "1", qty: 12, dia: 12, len: 4.00, fix: false },
+          { pos: "2", qty: 12, dia: 12, len: 3.00, fix: false },
+          { pos: "3", qty: 20, dia: 8, len: 2.50, fix: false }
+        ]
+      },
+      {
+        name: t("demo.list2"),
+        rows: [
+          { pos: t("demo.pos1"), qty: 4, dia: 12, len: 3.50, fix: false },
+          { pos: t("demo.pos2"), qty: 6, dia: 12, len: 2.45, fix: false }
+        ]
+      }
+    ]
+  };
+}
 
-let state = JSON.parse(JSON.stringify(DEMO));
+let state = null;        // wird nach dem Setzen der Sprache initialisiert
+let lastResult = null;   // letztes Rechenergebnis, damit die Ausgabe beim Sprachwechsel mitwandert
 const $ = id => document.getElementById(id);
 
 /* Zwischenspeicher im Browser, damit gesetzte Haken einen Reload überleben.
@@ -277,16 +591,16 @@ function renderLists() {
     <div class="list-card" data-li="${li}">
       <div class="list-head">
         <span class="tag info">${listShort(li)}</span>
-        <input type="text" value="${esc(L.name)}" data-act="name" placeholder="Bezeichnung der Stückliste">
-        <button class="mini" data-act="addrow">+ Zeile</button>
-        <button class="mini" data-act="dellist">Liste löschen</button>
+        <input type="text" value="${esc(L.name)}" data-act="name" placeholder="${esc(t("list.namePh"))}">
+        <button class="mini" data-act="addrow">${esc(t("list.addRow"))}</button>
+        <button class="mini" data-act="dellist">${esc(t("list.del"))}</button>
       </div>
       <div class="tbl-scroll">
       <table class="rowtable">
         <thead><tr>
-          <th style="width:20%">Pos.</th><th style="width:16%" class="num">Stück</th>
-          <th style="width:16%" class="num">ø [mm]</th><th style="width:20%" class="num">Länge [m]</th>
-          <th style="width:14%">fix</th><th style="width:8%"></th>
+          <th style="width:20%">${esc(t("th.pos"))}</th><th style="width:16%" class="num">${esc(t("th.qty"))}</th>
+          <th style="width:16%" class="num">${esc(t("th.dia"))}</th><th style="width:20%" class="num">${esc(t("th.len"))}</th>
+          <th style="width:14%">${esc(t("th.fix"))}</th><th style="width:8%"></th>
         </tr></thead>
         <tbody>
         ${L.rows.map((r, ri) => `
@@ -310,19 +624,19 @@ function renderRests() {
   const host = $("rests");
   if (!state.rests) state.rests = [];
   if (!state.rests.length) {
-    host.innerHTML = `<p class="small muted" style="margin:0">Keine Reststangen erfasst — es wird ausschließlich von neuen Lagerstangen geschnitten.</p>`;
+    host.innerHTML = `<p class="small muted" style="margin:0">${esc(t("rest.none"))}</p>`;
     return;
   }
   host.innerHTML = `<table class="rowtable">
     <thead><tr>
-      <th style="width:22%" class="num">ø [mm]</th><th style="width:28%" class="num">Länge [m]</th>
-      <th style="width:22%" class="num">Stück</th><th style="width:20%">Bemerkung</th><th style="width:8%"></th>
+      <th style="width:22%" class="num">${esc(t("th.dia"))}</th><th style="width:28%" class="num">${esc(t("th.len"))}</th>
+      <th style="width:22%" class="num">${esc(t("th.qty"))}</th><th style="width:20%">${esc(t("th.note"))}</th><th style="width:8%"></th>
     </tr></thead>
     <tbody>${state.rests.map((r, i) => `<tr data-rest="${i}">
       <td><input type="number" value="${r.dia}" min="1" step="1" data-f="dia"></td>
       <td><input type="number" value="${r.len}" min="0" step="0.01" data-f="len"></td>
       <td><input type="number" value="${r.qty}" min="0" step="1" data-f="qty"></td>
-      <td><input type="text" value="${esc(r.note || "")}" data-f="note" placeholder="Lagerplatz …"></td>
+      <td><input type="text" value="${esc(r.note || "")}" data-f="note" placeholder="${esc(t("rest.notePh"))}"></td>
       <td style="text-align:right"><button class="mini" data-act="delrest">×</button></td>
     </tr>`).join("")}</tbody></table>`;
 }
@@ -355,18 +669,18 @@ function renderDiaSettings() {
   const ds = diameters();
   if (!ds.length) { $("diaSettings").innerHTML = ""; return; }
   $("diaSettings").innerHTML = `
-    <h3>Material je Durchmesser</h3>
+    <h3>${esc(t("dia.h"))}</h3>
     <div class="row" id="diaRow">
       ${ds.map(d => {
         const cfg = state.dia[d] || {};
         return `<div style="border:1px solid var(--line); border-radius:8px; padding:8px 10px" data-dia="${d}">
           <div style="font-weight:600; margin-bottom:4px">ø ${d} mm</div>
-          <label class="f">Lagerlänge [m]
+          <label class="f">${esc(t("dia.stock"))}
             <input type="number" step="0.01" min="0.5" style="width:100px" data-dcfg="stock"
                    value="${cfg.stock != null ? cfg.stock : ""}" placeholder="${NF(state.stockDefault, 2)}">
           </label>
           <label class="small" style="display:flex; gap:6px; align-items:center; margin-top:6px; color:var(--muted)">
-            <input type="checkbox" data-dcfg="ring" ${cfg.ring ? "checked" : ""}> aus Ring (kein Verschnitt)
+            <input type="checkbox" data-dcfg="ring" ${cfg.ring ? "checked" : ""}> ${esc(t("dia.ring"))}
           </label>
         </div>`;
       }).join("")}
@@ -404,12 +718,12 @@ $("diaSettings").addEventListener("input", e => {
 
 $("stockDefault").addEventListener("input", e => { state.stockDefault = parseFloat(e.target.value.replace(",", ".")) || 12; renderDiaSettings(); });
 $("minRest").addEventListener("input", e => { state.minRest = parseFloat(e.target.value.replace(",", ".")) || 0; });
-$("btnAddList").onclick = () => { state.lists.push({ name: "Neue Stückliste", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }); renderLists(); };
-$("btnDemo").onclick = () => { state = JSON.parse(JSON.stringify(DEMO)); $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest; renderLists(); $("out").innerHTML = ""; save(); };
-$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, rests: [], done: {}, lists: [{ name: "Stückliste 1", rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; renderLists(); $("out").innerHTML = ""; save(); };
+$("btnAddList").onclick = () => { state.lists.push({ name: t("list.new"), rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }); renderLists(); };
+$("btnDemo").onclick = () => { state = demoState(); lastResult = null; $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest; renderLists(); $("out").innerHTML = ""; save(); };
+$("btnClear").onclick = () => { state = { stockDefault: state.stockDefault, minRest: state.minRest, dia: {}, rests: [], done: {}, lists: [{ name: t("list.first"), rows: [{ pos: "", qty: 1, dia: 12, len: 1, fix: false }] }] }; lastResult = null; renderLists(); $("out").innerHTML = ""; save(); };
 $("btnResetDone").onclick = () => {
   const n = Object.keys(state.done || {}).length;
-  if (n && !confirm(`${n} gesetzte Haken zurücksetzen?`)) return;
+  if (n && !confirm(t("ask.reset", { n }))) return;
   state.done = {};
   refreshTicks(); save();
 };
@@ -430,11 +744,12 @@ $("fileImport").addEventListener("change", e => {
       if (!d.lists) throw 0;
       state = Object.assign({}, DEFAULTS, d);
       if (!state.done) state.done = {};
+      lastResult = null;
       $("stockDefault").value = state.stockDefault; $("minRest").value = state.minRest;
       renderLists(); $("out").innerHTML = ""; save();
       const nd = Object.keys(state.done).length;
-      if (nd) alert(`Daten geladen — ${nd} gesetzte Haken übernommen.\nNach dem Neuberechnen erscheinen sie wieder im Schneideplan.`);
-    } catch (_) { alert("Datei konnte nicht gelesen werden."); }
+      if (nd) alert(t("msg.imported", { n: nd }));
+    } catch (_) { alert(t("msg.readFail")); }
   };
   rd.readAsText(f);
 });
@@ -591,14 +906,16 @@ function calc() {
       it.label = it.label + String.fromCharCode(97 + n);
     }
   });
-  if (!items.length) { $("out").innerHTML = `<div class="panel"><p class="note bad">Keine gültigen Positionen erfasst.</p></div>`; return; }
+  if (!items.length) { lastResult = { empty: true }; showNoItems(); return; }
 
   const stockOf = d => mm((state.dia[d] && state.dia[d].stock) || state.stockDefault);
   const ringOf = d => !!(state.dia[d] && state.dia[d].ring);
 
+  // Hinweise werden als Daten gesammelt und erst beim Rendern übersetzt,
+  // damit sie beim Sprachwechsel mitwandern.
   items.forEach(it => {
     if (!it.fix && !ringOf(it.dia) && it.len > stockOf(it.dia))
-      errors.push(`${it.label}: Einzellänge ${NF(it.lenM)} m > Lagerlänge ${NF(m(stockOf(it.dia)))} m — Stoß erforderlich oder Fixlänge bestellen.`);
+      errors.push({ key: "err.tooLong", label: it.label, lenM: it.lenM, capM: m(stockOf(it.dia)) });
   });
 
   // Vorhandene Reststangen je ø (stückweise aufgelöst)
@@ -691,11 +1008,16 @@ function calc() {
       kgm: kgPerM(g.dia)
     });
   }
+  lastResult = { results, errors, minRest };
   render(results, errors, minRest);
 }
 
 /* ---------- Ausgabe ---------- */
 function colorFor(ix) { return `hsl(${(ix * 47 + 14) % 360} 62% 68%)`; }
+
+function showNoItems() {
+  $("out").innerHTML = `<div class="panel"><p class="note bad">${esc(t("err.none"))}</p></div>`;
+}
 
 /* Schlüssel für den Erledigt-Haken. Enthält bewusst den Inhalt der Stange:
    ändert sich der Schnitt nach einer Neuberechnung, verfällt der Haken,
@@ -730,14 +1052,14 @@ function refreshTicks() {
   });
   document.querySelectorAll("#out [data-prog]").forEach(el => {
     const s = stat(el.closest(".panel") || document);
-    el.innerHTML = s.n ? `<b>${s.done}</b> / ${s.n} Stangen geschnitten` : "";
+    el.innerHTML = s.n ? t("prog.bars", { done: s.done, n: s.n }) : "";
   });
   const box = $("progAll");
   if (box) {
     const s = stat($("out"));
-    box.innerHTML = `<div class="k">Fortschritt Zuschnitt</div>
+    box.innerHTML = `<div class="k">${esc(t("prog.k"))}</div>
       <div class="v"${s.done && s.done === s.n ? ` style="color:var(--ok)"` : ""}>${s.done} / ${s.n}</div>
-      <div class="n">Stangen abgehakt · ${NF(s.n ? s.done / s.n * 100 : 0, 0)} %</div>`;
+      <div class="n">${esc(t("prog.n", { p: NF(s.n ? s.done / s.n * 100 : 0, 0) }))}</div>`;
   }
 }
 
@@ -761,25 +1083,26 @@ function render(results, errors, minRest) {
   });
 
   out.push(`<div class="panel">
-    <h2>Ergebnis — Gesamtübersicht</h2>
-    ${errors.length ? `<div class="note bad"><b>Hinweise:</b><br>${errors.map(esc).join("<br>")}</div>` : ""}
+    <h2>${esc(t("res.h"))}</h2>
+    ${errors.length ? `<div class="note bad"><b>${esc(t("res.notes"))}</b><br>${errors.map(e =>
+        esc(t(e.key, { label: e.label, len: NF(e.lenM), cap: NF(e.capM) }))).join("<br>")}</div>` : ""}
     <div class="cards">
-      <div class="kpi"><div class="k">Neue Lagerstangen</div><div class="v">${NF0(gBars)} Stk</div><div class="n">zu bestellen, über alle ø</div></div>
-      <div class="kpi"><div class="k">Materialeinsatz neu</div><div class="v">${NF(gStock, 1)} kg</div><div class="n">Bedarf netto ${NF(gNeed, 1)} kg</div></div>
-      <div class="kpi"><div class="k">Verschnitt</div><div class="v">${NF(gWaste, 1)} kg</div><div class="n">${NF(gStock ? gWaste / gStock * 100 : 0, 1)} % vom Neumaterial</div></div>
-      ${gRestBars ? `<div class="kpi" style="border-color:var(--ok)"><div class="k">Aus Reststangen gedeckt</div><div class="v" style="color:var(--ok)">${NF(gRestKg, 1)} kg</div><div class="n">${gRestBars} Reststange${gRestBars > 1 ? "n" : ""} angebrochen</div></div>` : ""}
-      ${gFixKg ? `<div class="kpi"><div class="k">Fixlängen / Ring</div><div class="v">${NF(gFixKg, 1)} kg</div><div class="n">ohne Schneideverschnitt</div></div>` : ""}
+      <div class="kpi"><div class="k">${esc(t("kpi.bars.k"))}</div><div class="v">${NF0(gBars)} ${esc(t("unit.pcs"))}</div><div class="n">${esc(t("kpi.bars.n"))}</div></div>
+      <div class="kpi"><div class="k">${esc(t("kpi.mat.k"))}</div><div class="v">${NF(gStock, 1)} kg</div><div class="n">${esc(t("kpi.mat.n", { kg: NF(gNeed, 1) }))}</div></div>
+      <div class="kpi"><div class="k">${esc(t("kpi.waste.k"))}</div><div class="v">${NF(gWaste, 1)} kg</div><div class="n">${esc(t("kpi.waste.n", { p: NF(gStock ? gWaste / gStock * 100 : 0, 1) }))}</div></div>
+      ${gRestBars ? `<div class="kpi" style="border-color:var(--ok)"><div class="k">${esc(t("kpi.rest.k"))}</div><div class="v" style="color:var(--ok)">${NF(gRestKg, 1)} kg</div><div class="n">${esc(t("kpi.rest.n", { n: gRestBars }))}</div></div>` : ""}
+      ${gFixKg ? `<div class="kpi"><div class="k">${esc(t("kpi.fix.k"))}</div><div class="v">${NF(gFixKg, 1)} kg</div><div class="n">${esc(t("kpi.fix.n"))}</div></div>` : ""}
       <div class="kpi" id="progAll"></div>
     </div>
   </div>`);
 
   // Bestellliste
   out.push(`<div class="panel">
-    <h3>Bestellung Lagerstangen</h3>
+    <h3>${esc(t("order.h"))}</h3>
     <div class="tbl-scroll"><table>
-      <thead><tr><th>ø</th><th class="num">Lagerlänge</th><th class="num">neue Stangen</th><th class="num">Gesamtlänge</th><th class="num">Masse</th><th class="num">aus Reststangen</th><th class="num">Verschnitt</th></tr></thead>
+      <thead><tr><th>ø</th><th class="num">${esc(t("th.stockLen"))}</th><th class="num">${esc(t("th.newBars"))}</th><th class="num">${esc(t("th.totalLen"))}</th><th class="num">${esc(t("th.mass"))}</th><th class="num">${esc(t("th.fromRest"))}</th><th class="num">${esc(t("th.waste"))}</th></tr></thead>
       <tbody>${results.map(R => `<tr>
-        <td><b>ø ${R.g.dia}</b>${R.g.ring ? ` <span class="tag ok">Ring</span>` : ""}</td>
+        <td><b>ø ${R.g.dia}</b>${R.g.ring ? ` <span class="tag ok">${esc(t("tag.ring"))}</span>` : ""}</td>
         <td class="num">${NF(m(R.g.cap))} m</td>
         <td class="num"><b>${NF0(R.barsNew.length)}</b></td>
         <td class="num">${NF(m(R.totalStock), 1)} m</td>
@@ -797,14 +1120,17 @@ function render(results, errors, minRest) {
     out.push(`<div class="panel">
       <div class="grp-title">
         <span class="d">ø ${R.g.dia} mm</span>
-        <span class="muted small">Lagerlänge ${NF(m(R.g.cap))} m · ${R.barsNew.length} neue Stangen${R.barsRest.length ? ` + ${R.barsRest.length} Reststangen` : ""} · Verschnitt ${NF(m(R.wasteAll), 2)} m (${NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)} %)</span>
-        ${R.barsNew.length === R.lower ? `<span class="tag ok">optimal — Materialschranke erreicht</span>` :
-          `<span class="tag warn">rechn. Untergrenze ${R.lower} Stangen (durch die Längenkombination nicht immer erreichbar)</span>`}
+        <span class="muted small">${esc(t("grp.meta", {
+          cap: NF(m(R.g.cap)), nNew: R.barsNew.length, nRest: R.barsRest.length,
+          waste: NF(m(R.wasteAll), 2), p: NF(R.totalStock ? R.wasteAll / R.totalStock * 100 : 0, 1)
+        }))}</span>
+        ${R.barsNew.length === R.lower ? `<span class="tag ok">${esc(t("tag.optimal"))}</span>` :
+          `<span class="tag warn">${esc(t("tag.lower", { n: R.lower }))}</span>`}
         <span class="prog" data-prog style="margin-left:auto"></span>
       </div>`);
 
     if (R.fixed.length) {
-      out.push(`<div class="note">Nicht im Schneideplan (Fixlänge/Ring/zu lang):
+      out.push(`<div class="note">${esc(t("grp.notInPlan"))}
         ${R.fixed.map(it => `${esc(it.label)} — ${it.qty}× ${NF(it.lenM)} m`).join(" · ")}</div>`);
     }
 
@@ -816,11 +1142,12 @@ function render(results, errors, minRest) {
       const free = R.remnants.slice().sort((a, b) => b - a);
       usedLens.forEach(L => { const i = free.indexOf(L); if (i >= 0) free.splice(i, 1); });
       out.push(`<div class="note" style="border-color:var(--ok); background:var(--ok-soft)">
-        <b>Reststangen:</b> ${R.remnants.length} vorhanden (${NF(m(R.remnantTotal), 2)} m) ·
-        ${R.barsRest.length ? `<b>${R.barsRest.length} angebrochen</b>, daraus ${NF(m(R.usedFromRest), 2)} m zu Stäben zugeschnitten
-          (spart ${NF(R.usedFromRest * R.kgm / 1000, 1)} kg Neumaterial), ${NF(m(R.restLeftover), 2)} m bleiben als neuer Rest`
-        : `keine eingesetzt — sie würden hier keine neue Stange einsparen und bleiben unangetastet am Lager`}${
-        free.length ? ` · unberührt: ${free.map(L => NF(m(L)) + " m").join(", ")}` : ""}
+        ${t("rest.balance", {
+          have: R.remnants.length, haveLen: NF(m(R.remnantTotal), 2),
+          used: R.barsRest.length, usedLen: NF(m(R.usedFromRest), 2),
+          savedKg: NF(R.usedFromRest * R.kgm / 1000, 1), leftover: NF(m(R.restLeftover), 2),
+          free: free.length ? free.map(L => NF(m(L)) + " m").join(", ") : ""
+        })}
       </div>`);
     }
 
@@ -831,9 +1158,9 @@ function render(results, errors, minRest) {
       if (!pat.has(k)) pat.set(k, { lens: b.pieces.map(p => p.len), n: 0, rest: b.rest, ids: [] });
       const e = pat.get(k); e.n++; e.ids.push(b.id);
     });
-    if (pat.size) out.push(`<h3>Schnittmuster — Übersicht (neue Stangen)</h3>
+    if (pat.size) out.push(`<h3>${esc(t("pat.h"))}</h3>
       <div class="tbl-scroll"><table>
-        <thead><tr><th class="num">Anzahl</th><th>Schnittmuster je ${NF(m(R.g.cap))} m Stange</th><th class="num">Rest</th><th class="num">Verschnitt gesamt</th></tr></thead>
+        <thead><tr><th class="num">${esc(t("th.count"))}</th><th>${esc(t("pat.per", { cap: NF(m(R.g.cap)) }))}</th><th class="num">${esc(t("th.rest"))}</th><th class="num">${esc(t("th.wasteTotal"))}</th></tr></thead>
         <tbody>${[...pat.values()].sort((a, b) => b.n - a.n).map(e => `<tr>
           <td class="num"><b>${e.n}×</b></td>
           <td>${e.lens.map(L => NF(m(L))).join(" + ")}</td>
@@ -856,7 +1183,8 @@ function render(results, errors, minRest) {
     } else {
       R.bars.forEach(b => shown.push(Object.assign({}, b, { ids: [b.id], members: [{ id: b.id, key: doneKey(b) }] })));
     }
-    out.push(`<h3 style="margin-top:18px">Schneideplan — Stange für Stange${group && shown.length < R.bars.length ? ` <span class="muted" style="text-transform:none; letter-spacing:0">(${R.bars.length} Stangen in ${shown.length} identischen Gruppen)</span>` : ""}</h3>`);
+    out.push(`<h3 style="margin-top:18px">${esc(t("plan.h"))}${group && shown.length < R.bars.length
+      ? ` <span class="muted" style="text-transform:none; letter-spacing:0">${esc(t("plan.grouped", { bars: R.bars.length, groups: shown.length }))}</span>` : ""}</h3>`);
     const maxCap = Math.max(R.g.cap, ...R.bars.map(b => b.cap));
     shown.forEach(b => {
       const segs = b.pieces.map(p => {
@@ -865,7 +1193,7 @@ function render(results, errors, minRest) {
         return `<div class="seg" style="flex:${p.len} 0 0; background:${colorFor(ix.get(p.it.key))}" title="${esc(p.it.label)} · ${NF(m(p.len))} m">${txt}</div>`;
       }).join("");
       const restSeg = b.rest > 0
-        ? `<div class="seg rest" style="flex:${b.rest} 0 0" title="Rest ${NF(m(b.rest))} m">${b.rest / maxCap >= 0.09 ? "Rest " + NF(m(b.rest)) : ""}</div>`
+        ? `<div class="seg rest" style="flex:${b.rest} 0 0" title="${esc(t("seg.rest"))} ${NF(m(b.rest))} m">${b.rest / maxCap >= 0.09 ? esc(t("seg.rest")) + " " + NF(m(b.rest)) : ""}</div>`
         : "";
       const counts = new Map();
       b.pieces.forEach(p => { const k = p.it.label + "|" + p.len; counts.set(k, (counts.get(k) || 0) + 1); });
@@ -874,30 +1202,30 @@ function render(results, errors, minRest) {
       const gi = tickGroups.push(b.members.map(mb => mb.key)) - 1;
       out.push(`<div class="bar">
         <div class="bar-head">
-          <span>${ids.length > 1 ? `<b>${ids.length}× Stangen</b> <span class="muted">${rangeTxt}</span>` : `<b>${ids[0]}</b>`}
+          <span>${ids.length > 1 ? `<b>${esc(t("bar.nBars", { n: ids.length }))}</b> <span class="muted">${rangeTxt}</span>` : `<b>${ids[0]}</b>`}
             &nbsp;<span class="muted">${NF(m(b.cap))} m</span>
-            ${b.kind === "rest" ? `<span class="tag ok">Reststange</span>` : ""}</span>
-          <span>genutzt ${NF(m(b.used))} m · <span style="color:${b.rest >= minRest ? "var(--warn)" : "var(--muted)"}">Rest ${NF(m(b.rest))} m${b.rest >= minRest && b.rest > 0 ? " ↺ verwertbar" : ""}${ids.length > 1 ? ` (gesamt ${NF(m(b.rest * ids.length), 2)} m)` : ""}</span></span>
+            ${b.kind === "rest" ? `<span class="tag ok">${esc(t("tag.restBar"))}</span>` : ""}</span>
+          <span>${esc(t("bar.used", { x: NF(m(b.used)) }))} · <span style="color:${b.rest >= minRest ? "var(--warn)" : "var(--muted)"}">${esc(t("bar.rest", { x: NF(m(b.rest)) }))}${b.rest >= minRest && b.rest > 0 ? esc(t("bar.usable")) : ""}${ids.length > 1 ? esc(t("bar.totalRest", { x: NF(m(b.rest * ids.length), 2) })) : ""}</span></span>
         </div>
         <div class="bar-vis" style="width:${(b.cap / maxCap * 100).toFixed(2)}%">${segs}${restSeg}</div>
         <div class="chips">${[...counts.entries()].map(([k, n]) => {
           const [lab, L] = k.split("|");
-          return `<span class="chip">${n}× ${esc(lab)} &nbsp;${NF(m(+L))} m${ids.length > 1 ? ` <span class="muted">(je Stange)</span>` : ""}</span>`;
+          return `<span class="chip">${n}× ${esc(lab)} &nbsp;${NF(m(+L))} m${ids.length > 1 ? ` <span class="muted">${esc(t("bar.perBar"))}</span>` : ""}</span>`;
         }).join("")}</div>
         <div class="ticks">
           <label class="tick">
             <input type="checkbox" data-donegrp="${gi}">
-            <span>erledigt</span>
+            <span>${esc(t("bar.done"))}</span>
           </label>
-          ${b.members.length > 1 ? `<span class="tickcount">gilt für alle ${b.members.length} Stangen dieses Musters</span>` : ""}
+          ${b.members.length > 1 ? `<span class="tickcount">${esc(t("bar.appliesAll", { n: b.members.length }))}</span>` : ""}
         </div>
       </div>`);
     });
 
     // Zuordnung Position -> Stangen
-    out.push(`<h3 style="margin-top:18px">Zuordnung der Stücke zu den Positionen</h3>
+    out.push(`<h3 style="margin-top:18px">${esc(t("assign.h"))}</h3>
       <div class="tbl-scroll"><table>
-        <thead><tr><th>Position</th><th>Stückliste</th><th class="num">Länge</th><th class="num">Stück</th><th>geschnitten aus Stange</th></tr></thead>
+        <thead><tr><th>${esc(t("th.position"))}</th><th>${esc(t("th.list"))}</th><th class="num">${esc(t("th.length"))}</th><th class="num">${esc(t("th.qty"))}</th><th>${esc(t("th.cutFrom"))}</th></tr></thead>
         <tbody>${R.cut.map(it => {
           const src = new Map();
           R.bars.forEach(b => b.pieces.forEach(p => { if (p.it.key === it.key) src.set(b.id, (src.get(b.id) || 0) + 1); }));
@@ -910,11 +1238,11 @@ function render(results, errors, minRest) {
             else runs.push({ from: id, to: id, n });
           });
           const srcTxt = runs.map(r => r.from === r.to
-            ? `${r.from}<span class="muted">&nbsp;(${r.n}×)</span>`
-            : `<b>${r.from} – ${r.to}</b><span class="muted">&nbsp;(je ${r.n}×)</span>`).join(", ");
+            ? `${r.from}<span class="muted">&nbsp;${esc(t("assign.times", { n: r.n }))}</span>`
+            : `<b>${r.from} – ${r.to}</b><span class="muted">&nbsp;${esc(t("assign.each", { n: r.n }))}</span>`).join(", ");
           return `<tr>
             <td><span class="chip" style="background:${colorFor(ix.get(it.key))}; color:#10131a; border:none">${esc(it.label)}</span></td>
-            <td class="small muted">${esc(it.list)} · Pos. ${esc(it.pos)}</td>
+            <td class="small muted">${esc(t("assign.posOf", { list: it.list, pos: it.pos }))}</td>
             <td class="num">${NF(it.lenM)} m</td>
             <td class="num">${it.qty}</td>
             <td class="small">${srcTxt}</td>
@@ -924,7 +1252,7 @@ function render(results, errors, minRest) {
 
     // Reststücke
     if (R.usableRest.length) {
-      out.push(`<details><summary>${R.usableRest.length} verwertbare Reststücke ≥ ${NF(m(minRest))} m</summary>
+      out.push(`<details><summary>${esc(t("usable.summary", { n: R.usableRest.length, x: NF(m(minRest)) }))}</summary>
         <div class="chips" style="margin-top:6px">${R.usableRest.map(b => `<span class="chip">${b.id}: ${NF(m(b.rest))} m</span>`).join("")}</div>
       </details>`);
     }
@@ -949,52 +1277,47 @@ function renderWasteRanking(results) {
   const top = rows.filter(r => r.a.marginal > 0).slice(0, 3);
   let rec;
   if (!rows.some(worth)) {
-    const t = top[0];
-    rec = t ? `<div class="note">
-      Kein Kandidat für eine Fixlängen-Bestellung: der größte Verschnitttreiber ist
-      <b>${esc(t.a.it.label)}</b> (${t.a.it.qty}× ${NF(t.a.it.lenM)} m, ø ${t.a.it.dia}) mit nur
-      <b>${NF(m(t.a.marginal), 2)} m</b> Mehrverschnitt (${NF(t.a.marginal * t.R.kgm / 1000, 1)} kg) —
-      das ist weniger als eine Lagerstange. Alle Positionen selbst schneiden.
-    </div>` : "";
+    const c = top[0];
+    rec = c ? `<div class="note">${t("wa.noCand", {
+      label: esc(c.a.it.label), qty: c.a.it.qty, len: NF(c.a.it.lenM), dia: c.a.it.dia,
+      marg: NF(m(c.a.marginal), 2), kg: NF(c.a.marginal * c.R.kgm / 1000, 1)
+    })}</div>` : "";
   } else if (!top.length) {
-    rec = `<div class="note ok" style="border-color:var(--ok); background:var(--ok-soft)">
-      Keine Position verursacht rechnerisch zusätzlichen Verschnitt — die Längen lassen sich untereinander gut kombinieren.
-      Selbst schneiden ist hier durchwegs günstiger als Fixlängen zu bestellen.</div>`;
+    rec = `<div class="note ok" style="border-color:var(--ok); background:var(--ok-soft)">${esc(t("wa.none"))}</div>`;
   } else {
     const cands = rows.filter(worth);
-    const t = cands[0], others = cands.slice(1, 4);
+    const c = cands[0], others = cands.slice(1, 4);
     const totKg = cands.reduce((s, r) => s + r.a.marginal * r.R.kgm / 1000, 0);
     rec = `<div class="note warn">
-      <b>Empfehlung:</b> Position <b>${esc(t.a.it.label)}</b> (ø ${t.a.it.dia}, ${t.a.it.qty}× ${NF(t.a.it.lenM)} m,
-      ${esc(t.a.it.list)}) ist der mit Abstand größte Verschnitttreiber: sie erhöht den Verschnitt um
-      <b>${NF(m(t.a.marginal), 2)} m</b> = <b>${NF(t.a.marginal * t.R.kgm / 1000, 1)} kg</b>
-      — das entspricht ${NF(t.a.wasteBars, 1)} Lagerstangen, die als reiner Abfall gekauft werden.
-      Grund: aus ${NF(m(t.R.g.cap))} m ${t.a.perBar === 1 ? "geht nur 1 Stück" : `gehen nur ${t.a.perBar} Stück`}
-      à ${NF(t.a.it.lenM)} m, der verbleibende Rest lässt sich mit den übrigen Längen kaum füllen.
-      <b>Diese Position in Fixlänge ${NF(t.a.it.lenM)} m ab Werk bestellen</b> — dann entfällt der Anteil vollständig.
+      ${t("wa.rec", {
+        label: esc(c.a.it.label), dia: c.a.it.dia, qty: c.a.it.qty, len: NF(c.a.it.lenM), list: esc(c.a.it.list),
+        marg: NF(m(c.a.marginal), 2), kg: NF(c.a.marginal * c.R.kgm / 1000, 1),
+        bars: NF(c.a.wasteBars, 1), cap: NF(m(c.R.g.cap)), perBar: c.a.perBar
+      })}
       ${others.length
-        ? `<br>Ebenfalls über der Schwelle einer ganzen Lagerstange und damit prüfenswert:
-           ${others.map(r => `<b>${esc(r.a.it.label)}</b> (${r.a.it.qty}× ${NF(r.a.it.lenM)} m, +${NF(m(r.a.marginal), 2)} m)`).join(", ")}.
-           Alle Kandidaten zusammen ergeben ${NF(totKg, 1)} kg vermeidbaren Verschnitt.`
-        : `<br>Alle übrigen Positionen lassen sich gut kombinieren und bleiben Schnittware.`}
-      <br><span class="small">Zum Nachrechnen: Häkchen <b>fix</b> bei der Position setzen und neu berechnen.</span>
+        ? t("wa.recOthers", {
+            list: others.map(r => `<b>${esc(r.a.it.label)}</b> (${r.a.it.qty}× ${NF(r.a.it.lenM)} m, +${NF(m(r.a.marginal), 2)} m)`).join(", "),
+            kg: NF(totKg, 1)
+          })
+        : t("wa.recNoOthers")}
+      ${t("wa.recHint")}
     </div>`;
   }
 
   return `<div class="panel">
-    <h2>Verschnitt-Analyse je Position</h2>
+    <h2>${esc(t("wa.h"))}</h2>
     ${rec}
     <div class="tbl-scroll"><table>
       <thead><tr>
-        <th>Position</th><th class="num">ø</th><th class="num">Stück × Länge</th>
-        <th class="num">Grenz-Verschnitt</th><th class="num">alleine geschnitten</th>
-        <th class="num">Stk/Stange</th><th>Bewertung</th>
+        <th>${esc(t("th.position"))}</th><th class="num">ø</th><th class="num">${esc(t("th.qtyLen"))}</th>
+        <th class="num">${esc(t("th.marginal"))}</th><th class="num">${esc(t("th.alone"))}</th>
+        <th class="num">${esc(t("th.perBar"))}</th><th>${esc(t("th.rating"))}</th>
       </tr></thead>
       <tbody>${rows.map(({ R, a }) => {
         const marg = m(a.marginal), margKg = a.marginal * R.kgm / 1000;
         const w = worth({ R, a });
         const cls = w ? "bad" : a.marginal > 0 ? "warn" : "ok";
-        const txt = w ? "Fixlänge bestellen" : a.marginal > 0 ? "selbst schneiden" : "Füller — reduziert Verschnitt";
+        const txt = t(w ? "tag.orderFix" : a.marginal > 0 ? "tag.cutSelf" : "tag.filler");
         return `<tr>
           <td><b>${esc(a.it.label)}</b> <span class="small muted">${esc(a.it.list)}</span></td>
           <td class="num">${a.it.dia}</td>
@@ -1002,35 +1325,62 @@ function renderWasteRanking(results) {
           <td class="num">${marg > 0 ? "+" : ""}${NF(marg, 2)} m<br><span class="small muted">${margKg > 0 ? "+" : ""}${NF(margKg, 1)} kg</span></td>
           <td class="num">${NF(m(a.wasteAlone), 2)} m<br><span class="small muted">${NF(a.wasteAloneRatio * 100, 1)} %</span></td>
           <td class="num">${a.perBar}</td>
-          <td><span class="tag ${cls}">${txt}</span></td>
+          <td><span class="tag ${cls}">${esc(txt)}</span></td>
         </tr>`;
       }).join("")}</tbody>
     </table></div>
-    <p class="small muted" style="margin:10px 0 0">
-      <b>Grenz-Verschnitt</b> = Mehrverschnitt, den diese Position im Gesamtplan verursacht
-      (Plan mit dieser Position minus Plan ohne sie). Das ist das entscheidende Kriterium:
-      nur dieser Anteil lässt sich durch eine Fixlängen-Bestellung tatsächlich einsparen.
-      Ein <b>negativer</b> Wert heißt: die Position füllt die Reste der anderen Positionen auf und senkt den Gesamtverschnitt.
-      Als Fixlänge empfohlen wird erst, was mindestens eine ganze Lagerstange an Verschnitt verursacht.
-      <b>Alleine geschnitten</b> zeigt den Verschnitt, wenn die Position ohne Kombination mit anderen Längen
-      aus der Lagerstange geschnitten würde — hohe Werte hier bei gleichzeitig niedrigem Grenz-Verschnitt bedeuten:
-      die Position wird von anderen Positionen „aufgefangen“ und ist unkritisch.
-    </p>
+    <p class="small muted" style="margin:10px 0 0">${t("wa.foot")}</p>
   </div>`;
 }
 
-$("btnCalc").onclick = () => { $("btnCalc").textContent = "rechnet …"; setTimeout(() => { try { calc(); } finally { $("btnCalc").textContent = "Schneideplan berechnen"; } }, 20); };
+$("btnCalc").onclick = () => {
+  $("btnCalc").textContent = t("btn.calcBusy");
+  setTimeout(() => { try { calc(); } finally { $("btnCalc").textContent = t("btn.calc"); } }, 20);
+};
 
+/* ---------- Sprache anwenden / apply language ---------- */
+let restoreNote = null;
+
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.title = t("html.title");
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll("#langsw button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === LANG)));
+  if (restoreNote) restoreNote.innerHTML = t("msg.restored", { n: Object.keys(state.done || {}).length });
+}
+
+/* Sprachwechsel: statische Texte neu setzen, Eingabemaske neu zeichnen und —
+   falls schon gerechnet wurde — die Ausgabe aus dem letzten Ergebnis neu aufbauen.
+   Language switch: re-apply static text, redraw the input form and, if a plan has
+   already been calculated, re-render the output from the last result. */
+function setLang(lang, initial) {
+  LANG = I18N[lang] ? lang : "de";
+  try { localStorage.setItem(LS_LANG, LANG); } catch (e) { /* egal */ }
+  applyStatic();
+  if (initial) return;
+  renderLists();
+  if (lastResult && lastResult.empty) showNoItems();
+  else if (lastResult) render(lastResult.results, lastResult.errors, lastResult.minRest);
+}
+
+$("langsw").addEventListener("click", e => {
+  const b = e.target.closest("button[data-lang]"); if (!b) return;
+  if (b.dataset.lang !== LANG) setLang(b.dataset.lang, false);
+});
+
+/* ---------- Start ---------- */
+try { const l = localStorage.getItem(LS_LANG); if (l && I18N[l]) LANG = l; } catch (e) { /* egal */ }
+state = demoState();
 if (loadStored()) {
   $("stockDefault").value = state.stockDefault;
   $("minRest").value = state.minRest;
-  const nd = Object.keys(state.done).length;
-  const note = document.createElement("div");
-  note.className = "note no-print";
-  note.innerHTML = `Eingaben aus dem Browser-Speicher dieses Geräts wiederhergestellt${nd ? `, inklusive <b>${nd} gesetzter Haken</b>` : ""}.
-    Über <b>Beispieldaten laden</b> oder <b>Alles leeren</b> neu anfangen.`;
-  document.querySelector(".wrap").insertBefore(note, document.querySelector(".panel"));
+  restoreNote = document.createElement("div");
+  restoreNote.className = "note no-print";
+  document.querySelector(".wrap").insertBefore(restoreNote, document.querySelector(".panel"));
 }
 if (!state.done) state.done = {};
+setLang(LANG, true);
 renderLists();
 </script>

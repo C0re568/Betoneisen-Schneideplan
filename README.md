@@ -1,12 +1,30 @@
-# Schneideplan Betoneisen
+# Schneideplan Betoneisen · Rebar Cutting Plan
+
+**[Deutsch](#deutsch) · [English](#english)**
+
+**Datei / file:** [`schneideplan.html`](schneideplan.html) — eine einzige HTML-Datei ohne Abhängigkeiten /
+a single HTML file with no dependencies.
+
+---
+
+## Deutsch
 
 Werkzeug zur verschnittoptimierten Aufteilung von Betonstahl-Stabpositionen auf Lagerstangen
 (eindimensionales Zuschnittproblem / cutting stock).
 
-**Datei:** [`schneideplan.html`](schneideplan.html) — eine einzige HTML-Datei ohne Abhängigkeiten.
 Im Browser öffnen (Doppelklick), es wird nichts installiert und nichts hochgeladen.
 
-## Was es macht
+### Sprache
+
+Ganz oben rechts lässt sich zwischen **Deutsch** und **English** umschalten. Die Wahl wird im
+Browser gespeichert und beim nächsten Öffnen wieder verwendet; Standard ist Deutsch. Umgeschaltet
+wird die gesamte Oberfläche inklusive eines bereits berechneten Schneideplans — die Eingaben, die
+gesetzten Haken und das Ergebnis bleiben dabei erhalten, es wird nicht neu gerechnet. Auch die
+Zahlenformate wechseln mit (`7,00 m` bzw. `7.00 m`). Selbst eingetragene Bezeichnungen von
+Stücklisten und Positionen bleiben unverändert stehen — nur die Beispieldaten kommen beim Laden
+in der jeweils aktiven Sprache.
+
+### Was es macht
 
 * Verarbeitet **mehrere Stücklisten** gleichzeitig (z. B. Stoßüberdeckung, Obere Bewehrung, Unterzüge).
 * Rechnet **je Durchmesser getrennt**, Lagerlänge global oder je ø einstellbar (Standard 7,00 m).
@@ -21,13 +39,13 @@ Im Browser öffnen (Doppelklick), es wird nichts installiert und nichts hochgela
 * **Zusatzauswertung:** welche Position den meisten Verschnitt verursacht und daher besser
   in Fixlängen ab Werk bestellt wird.
 
-## Positions-Kennzeichnung
+### Positions-Kennzeichnung
 
 Jede Stückliste bekommt einen Buchstaben (A, B, C …), jedes Stück das Etikett `A·4`
 (= Stückliste A, Position 4). Kommt eine Positionsnummer mehrfach mit verschiedenen Längen vor,
 wird sie automatisch unterschieden (`C·UZ6a`, `C·UZ6b`).
 
-## Reststangen
+### Reststangen
 
 Unter „Vorhandene Reststangen" lassen sich verwertbare Reste aus früheren Schnitten mit
 ø, Länge und Stückzahl erfassen. Sie werden als zusätzliche Stangen mit eigener Länge in die
@@ -42,11 +60,12 @@ verbrauchtes Restmaterial. Die Ausgabe weist je Durchmesser aus, welche Reststan
 angebrochen wurden, welche unberührt bleiben und was nach dem Schnitt wieder als Rest anfällt.
 Reststangen erscheinen im Plan als `R12-01` (maßstäblich kürzer gezeichnet), neue Stangen als `S12-001`.
 
-## Erledigt-Haken
+### Erledigt-Haken
 
-Jede Stange im Schneideplan hat ein Kästchen zum Abhaken. Bei zusammengefassten Stangen
-erscheint ein Kästchen je Stangennummer plus ein Schalter **alle**; abgehakte Stangen werden
-durchgestrichen und ausgegraut. Der Fortschritt wird je Durchmesser und gesamt angezeigt
+Jeder Eintrag im Schneideplan hat genau ein Kästchen zum Abhaken. Sind identische Stangen
+zusammengefasst, gilt der Haken für alle Stangen dieses Musters (Hinweis daneben);
+abgehakte Einträge werden durchgestrichen und ausgegraut.
+Der Fortschritt wird in Stangen gezählt, je Durchmesser und gesamt angezeigt
 („34 / 176 Stangen geschnitten"). **Haken zurücksetzen** löscht alle Haken nach Rückfrage.
 
 Gespeichert wird an zwei Stellen:
@@ -54,8 +73,8 @@ Gespeichert wird an zwei Stellen:
 * **Export/Import JSON** — die Haken sind im Feld `done` enthalten und werden beim Import
   wieder übernommen (mit Meldung, wie viele es waren). Das ist der zuverlässige Weg, um den
   Stand zu sichern oder an ein anderes Gerät zu übergeben.
-* **Browser-Speicher** — Eingaben und Haken werden automatisch zwischengespeichert und beim
-  nächsten Öffnen auf demselben Gerät wiederhergestellt (mit Hinweis oben auf der Seite).
+* **Browser-Speicher** — Eingaben, Haken und die Sprachwahl werden automatisch zwischengespeichert
+  und beim nächsten Öffnen auf demselben Gerät wiederhergestellt (mit Hinweis oben auf der Seite).
   Manche Browser sperren das bei lokalen Dateien; dann greift lautlos nur der Export.
 
 Ein Haken hängt am Stangennamen **und am Inhalt der Stange**. Ändert sich nach einer
@@ -64,7 +83,7 @@ anderen Schnitt stehen zu bleiben — im Zweifel lieber „noch offen" als fäls
 Unveränderte Stangen behalten ihren Haken. Im Test blieben nach einer Mengenänderung
 37 von 66 Haken erhalten, die 29 geänderten Stangen wurden zurückgesetzt.
 
-## Verschnitt-Analyse
+### Verschnitt-Analyse
 
 Zwei Kennzahlen je Position:
 
@@ -79,7 +98,7 @@ Als Fixlänge empfohlen wird erst, was mindestens eine ganze Lagerstange an Vers
 verursacht. Mit dem Häkchen **fix** lässt sich das direkt gegenrechnen: die Position fällt
 aus dem Schneideplan und der Plan wird neu optimiert.
 
-## Rechenverfahren
+### Rechenverfahren
 
 Musterbasierte Heuristik: für jede Stange wird per Branch & Bound das am besten füllende
 Schnittmuster für den Restbedarf gesucht und maximal oft wiederholt; zusätzlich laufen
@@ -90,7 +109,7 @@ sekundär ein möglichst großes (und damit verwertbares) Reststück. Angezeigt 
 rechnerische Untergrenze (Gesamtlänge ÷ Lagerlänge) als Vergleichsmaßstab — diese ist je nach
 Längenkombination nicht immer erreichbar.
 
-## Bedienung
+### Bedienung
 
 * **Beispieldaten laden** — ein bewusst kleines Beispiel zum Überschreiben: zwei Stücklisten
   („Platte" mit 3 Positionen, „Unterzug" mit 2), zwei Durchmesser und eine vorhandene
@@ -99,6 +118,134 @@ Längenkombination nicht immer erreichbar.
   darüberschreiben, Zeilen und Listen nach Bedarf ergänzen.
 * **Export/Import JSON** — Daten sichern und wieder einlesen. Exportierte Stücklisten sind in
   `.gitignore` ausgenommen und landen nicht versehentlich im Repository.
-* **Drucken / PDF** — druckoptimierte Ausgabe für die Baustelle.
+* **Drucken / PDF** — druckoptimierte Ausgabe für die Baustelle (ohne Sprachumschalter und
+  Eingabefelder, in der gerade gewählten Sprache).
 * **aus Ring** — je Durchmesser aktivierbar: Material vom Ring (gerichteter Betonstahl) wird
   auf Länge abgelängt, es entsteht kein Schneideverschnitt.
+
+### Übersetzungen ergänzen
+
+Alle sichtbaren Texte stehen im Objekt `I18N` am Anfang des `<script>`-Blocks, je Sprache ein
+Schlüssel-Wert-Paar (Werte mit Platzhaltern sind Funktionen). Eine weitere Sprache braucht nur
+einen zusätzlichen Block `xx: { … }` in `I18N` und einen Knopf `<button data-lang="xx">` im
+Umschalter. Fehlt ein Schlüssel, greift automatisch der deutsche Text.
+
+---
+
+## English
+
+A tool for cutting rebar bar positions from stock bars with minimum waste
+(one-dimensional cutting-stock problem).
+
+Open it in a browser (double-click) — nothing is installed and nothing is uploaded.
+
+### Language
+
+The switch in the top right toggles between **Deutsch** and **English**. The choice is stored in
+the browser and reused the next time the file is opened; German is the default. Switching
+re-labels the entire interface including a cutting plan that has already been calculated —
+inputs, check marks and results are preserved and nothing is recalculated. Number formats follow
+the language (`7,00 m` vs. `7.00 m`). Names you typed yourself for bar lists and positions stay
+exactly as they are — only the sample data is loaded in whichever language is active.
+
+### What it does
+
+* Handles **several bar lists** at once (e.g. lap splices, top reinforcement, beams).
+* Calculates **separately per diameter**; stock length can be set globally or per ø (default 7.00 m).
+* Optionally takes **remnant bars already in stock** into account (see below).
+* **Kerf width is ignored** (as required).
+* Produces a cutting plan in which **every cut piece stays assigned to its position**:
+  * cutting-pattern overview (what is cut, and how often),
+  * bar-by-bar plan with a position label on each piece (identical bars grouped),
+  * reverse lookup "position → which bars was it cut from".
+* **A check mark per bar** to tick off while cutting, with a progress display.
+* Lists **usable offcuts** above a configurable minimum length.
+* **Extra analysis:** which position causes the most waste and is therefore better ordered
+  as a fixed length from the mill.
+
+### Position labels
+
+Each bar list gets a letter (A, B, C …) and each piece a label such as `A·4`
+(= bar list A, position 4). If the same position number occurs more than once with different
+lengths, it is distinguished automatically (`C·UZ6a`, `C·UZ6b`).
+
+### Remnant bars
+
+Under "Remnant bars in stock" you can enter usable remnants from earlier cuts with ø, length and
+quantity. They enter the optimisation as extra bars with their own length — with one deliberate
+restriction:
+
+> A remnant bar is **only started if doing so saves a new bar.**
+
+Otherwise stock material would be consumed without changing the order quantity — the offcut would
+merely move from one pile to another. Order of priority: (1) as few new bars as possible,
+(2) as few started remnant bars as possible, (3) as little remnant material consumed as possible.
+For each diameter the output states which remnant bars were started, which stay untouched, and
+what is left over as a new offcut after cutting. Remnant bars appear in the plan as `R12-01`
+(drawn shorter to scale), new bars as `S12-001`.
+
+### Check marks
+
+Every entry in the cutting plan has exactly one box to tick. Where identical bars are grouped, the
+check mark applies to all bars of that pattern (noted next to it); ticked entries are struck
+through and greyed out. Progress is counted in bars and shown per diameter and in total
+("34 / 176 bars cut"). **Reset check marks** clears all of them after a confirmation prompt.
+
+They are stored in two places:
+
+* **Export/import JSON** — the check marks are part of the `done` field and are carried over on
+  import (with a message stating how many). This is the reliable way to back up your progress or
+  move it to another device.
+* **Browser storage** — inputs, check marks and the language choice are cached automatically and
+  restored the next time the file is opened on the same device (with a note at the top of the
+  page). Some browsers block this for local files; the export then quietly remains the only route.
+
+A check mark is tied to the bar name **and to the bar's contents**. If a recalculation changes a
+bar's cutting pattern, its check mark lapses instead of carrying over to a materially different
+cut — when in doubt, "still open" beats a false "done". Unchanged bars keep their check marks.
+In a test, 37 of 66 check marks survived a quantity change while the 29 altered bars were reset.
+
+### Waste analysis
+
+Two figures per position:
+
+* **Marginal waste** — the extra waste the position causes in the overall plan
+  (plan with the position minus plan without it). Only this share can actually be saved by
+  ordering a fixed length. Negative = the position fills up other positions' offcuts and lowers
+  total waste.
+* **Cut on its own** — the waste if the position were cut from the stock bar without being
+  combined with other lengths.
+
+A fixed length is only recommended once a position causes at least one full stock bar of waste.
+The **fixed** tick box lets you verify this directly: the position drops out of the cutting plan
+and the plan is re-optimised.
+
+### Method
+
+A pattern-based heuristic: for each bar, branch & bound searches for the pattern that best fills
+the remaining demand, and repeats it as often as possible; best-fit-decreasing and randomised
+multi-starts run alongside. Remnant bars are filled beforehand in ascending and in descending
+order, and the better variant wins. Solutions are ranked primarily by the number of bars and
+secondarily by the largest (and therefore reusable) offcut. The theoretical lower bound
+(total length ÷ stock length) is displayed as a benchmark — depending on the mix of lengths it is
+not always reachable.
+
+### Usage
+
+* **Load sample data** — a deliberately small example to overwrite: two bar lists ("Slab" with
+  3 positions, "Beam" with 2), two diameters and one remnant bar in stock. It shows every building
+  block in a case you can follow at a glance — including a position that stands out as a
+  fixed-length candidate. Just type your own numbers over it and add rows and lists as needed.
+* **Export/import JSON** — back up your data and read it back in. Exported bar lists are excluded
+  in `.gitignore` and will not end up in the repository by accident.
+* **Print / PDF** — print-optimised output for the site (without the language switch and input
+  fields, in the language currently selected).
+* **From coil** — can be enabled per diameter: material from a coil (straightened rebar) is cut to
+  length, so no cutting waste occurs.
+
+### Adding translations
+
+All visible text lives in the `I18N` object at the top of the `<script>` block, one key-value pair
+per language (values with placeholders are functions). Another language only needs an additional
+`xx: { … }` block in `I18N` and a `<button data-lang="xx">` in the switch. If a key is missing, the
+German text is used automatically.
