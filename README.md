@@ -2,8 +2,13 @@
 
 **[Deutsch](#deutsch) · [English](#english)**
 
+**Online:** <https://c0re568.github.io/Betoneisen-Schneideplan/> — direkt im Browser benutzen /
+use it straight in the browser.
+
 **Datei / file:** [`schneideplan.html`](schneideplan.html) — eine einzige HTML-Datei ohne Abhängigkeiten /
 a single HTML file with no dependencies.
+[Download der aktuellen Version](https://github.com/C0re568/Betoneisen-Schneideplan/releases/latest/download/schneideplan.html)
+/ [download the current version](https://github.com/C0re568/Betoneisen-Schneideplan/releases/latest/download/schneideplan.html).
 
 ---
 
@@ -125,6 +130,20 @@ Längenkombination nicht immer erreichbar.
 * **aus Ring** — je Durchmesser aktivierbar: Material vom Ring (gerichteter Betonstahl) wird
   auf Länge abgelängt, es entsteht kein Schneideverschnitt.
 
+### Online oder lokal
+
+Beides ist dasselbe Werkzeug, die Wahl ist reine Bequemlichkeit:
+
+* **Online** unter <https://c0re568.github.io/Betoneisen-Schneideplan/> — nichts herunterladen,
+  der Link lässt sich weitergeben und am Handy als Lesezeichen ablegen. Gerechnet wird trotzdem
+  ausschließlich im Browser; es werden keine Daten an einen Server geschickt.
+* **Lokal** als heruntergeladene Datei — funktioniert ohne Internet, etwa auf der Baustelle.
+
+Ein Hinweis zum Speicher: Eingaben und gesetzte Haken liegen im Speicher des Browsers, und der
+ist **je Adresse getrennt**. Wer bisher die lokale Datei benutzt hat, findet seine Daten unter
+der Online-Adresse nicht wieder (und umgekehrt). Für den Umzug den **Export JSON** auf der einen
+Seite und **Import JSON** auf der anderen benutzen.
+
 ### Übersetzungen ergänzen
 
 Alle sichtbaren Texte stehen im Objekt `I18N` am Anfang des `<script>`-Blocks, je Sprache ein
@@ -244,6 +263,20 @@ not always reachable.
   fields, in the language currently selected).
 * **From coil** — can be enabled per diameter: material from a coil (straightened rebar) is cut to
   length, so no cutting waste occurs.
+
+### Online or local
+
+Both are the same tool; pick whichever is more convenient:
+
+* **Online** at <https://c0re568.github.io/Betoneisen-Schneideplan/> — nothing to download, the
+  link can be shared and bookmarked on a phone. Everything is still calculated in the browser
+  alone; no data is sent to a server.
+* **Local**, as a downloaded file — works without an internet connection, e.g. on site.
+
+One note about storage: inputs and check marks live in the browser's storage, which is **kept
+separately per address**. If you have been using the local file, your data will not show up at
+the online address (and vice versa). To move it across, use **export JSON** on one side and
+**import JSON** on the other.
 
 ### Adding translations
 
