@@ -1,14 +1,16 @@
 # Schneideplan Betoneisen · Rebar Cutting Plan
 
+## ▶ [Werkzeug öffnen / open the tool](https://c0re568.github.io/Betoneisen-Schneideplan/)
+
+<https://c0re568.github.io/Betoneisen-Schneideplan/> — direkt im Browser, nichts zu installieren /
+straight in the browser, nothing to install.
+
 **[Deutsch](#deutsch) · [English](#english)**
 
-**Online:** <https://c0re568.github.io/Betoneisen-Schneideplan/> — direkt im Browser benutzen /
-use it straight in the browser.
-
 **Datei / file:** [`schneideplan.html`](schneideplan.html) — eine einzige HTML-Datei ohne Abhängigkeiten /
-a single HTML file with no dependencies.
-[Download der aktuellen Version](https://github.com/C0re568/Betoneisen-Schneideplan/releases/latest/download/schneideplan.html)
-/ [download the current version](https://github.com/C0re568/Betoneisen-Schneideplan/releases/latest/download/schneideplan.html).
+a single HTML file with no dependencies. Für die Arbeit ohne Internet legt der Knopf
+**Als Datei speichern** auf der Seite sie ab / the **Save as file** button on the page stores it
+for working offline.
 
 ---
 
